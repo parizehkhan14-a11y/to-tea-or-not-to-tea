@@ -88,16 +88,14 @@ textarea {
 
 .hero-stage {
   position: relative;
-  min-height: 0;
-  margin-bottom: 0;
+  margin-bottom: 0.25rem;
+  padding-bottom: clamp(11rem, 15vw, 14rem);
 }
 
 .hero-backdrop {
   display: block;
   width: 100%;
-  height: clamp(360px, 42vw, 560px);
-  object-fit: cover;
-  object-position: center top;
+  height: auto;
 }
 
 .hero-copy {
@@ -124,16 +122,19 @@ textarea {
 }
 
 .composer-section {
-  position: relative;
-  z-index: 2;
-  margin-top: -3rem;
-  margin-bottom: 0.75rem;
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  z-index: 3;
+  width: 100%;
   display: flex;
   justify-content: center;
+  padding: 0 0.75rem;
+  transform: translate(-50%, 44%);
 }
 
 .composer-wrap {
-  width: min(100%, 560px);
+  width: min(calc(100% - 1rem), 560px);
 }
 
 .composer-card {
@@ -299,7 +300,7 @@ textarea {
 
 .flavor-board-section,
 .all-reviews-section {
-  margin-top: 0.25rem;
+  margin-top: 0.5rem;
 }
 
 .board-title {
@@ -629,8 +630,8 @@ textarea {
 }
 
 @media (max-width: 900px) {
-  .hero-backdrop {
-    height: clamp(330px, 48vw, 450px);
+  .hero-stage {
+    padding-bottom: clamp(12rem, 23vw, 14.5rem);
   }
 
   .hero-copy {
@@ -643,12 +644,12 @@ textarea {
   }
 
   .composer-section {
-    margin-top: -2.4rem;
+    transform: translate(-50%, 47%);
   }
 
   .flavor-board-section,
   .all-reviews-section {
-    margin-top: 0.85rem;
+    margin-top: 0.3rem;
   }
 
   .review-grid {
@@ -666,14 +667,13 @@ textarea {
     justify-content: center;
   }
 
-  .hero-backdrop {
-    height: 300px;
-    object-position: 74% top;
+  .hero-stage {
+    padding-bottom: 16rem;
   }
 
   .hero-copy {
     left: 1rem;
-    top: 1rem;
+    top: 0.9rem;
   }
 
   .hero-copy h1 {
@@ -686,16 +686,17 @@ textarea {
   }
 
   .composer-section {
-    margin-top: -1.5rem;
+    transform: translate(-50%, 52%);
+    padding: 0 0.5rem;
   }
 
   .composer-wrap {
-    width: calc(100% - 1rem);
+    width: min(calc(100% - 0.5rem), 420px);
   }
 
   .flavor-board-section,
   .all-reviews-section {
-    margin-top: 0.75rem;
+    margin-top: 0.2rem;
   }
 
   .board-title {
