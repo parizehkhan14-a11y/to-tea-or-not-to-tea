@@ -55,6 +55,7 @@ textarea {
 
 .page-nav,
 .sort-toolbar,
+.flavor-filter,
 .board-footer {
   display: flex;
   flex-wrap: wrap;
@@ -89,20 +90,13 @@ textarea {
   position: relative;
   aspect-ratio: 1536 / 1028;
   min-height: 720px;
-  margin-bottom: clamp(220px, 22vw, 320px);
-}
-
-.hero-stage-reviews {
-  min-height: 660px;
-  margin-bottom: clamp(200px, 20vw, 290px);
+  margin-bottom: 0;
 }
 
 .hero-backdrop {
-  position: absolute;
-  inset: 0;
+  display: block;
   width: 100%;
   height: 100%;
-  display: block;
   object-fit: cover;
   object-position: top center;
 }
@@ -130,24 +124,66 @@ textarea {
   max-width: 31rem;
 }
 
-.composer-wrap {
-  position: absolute;
-  left: 50%;
-  bottom: 0;
-  transform: translate(-50%, 40%);
+.composer-section {
+  position: relative;
   z-index: 2;
-  width: min(100%, 392px);
+  margin-top: -8rem;
+  margin-bottom: 2rem;
+  display: flex;
+  justify-content: center;
+}
+
+.composer-wrap {
+  width: min(100%, 560px);
 }
 
 .composer-card {
+  position: relative;
+  overflow: hidden;
   width: 100%;
-  padding: 1.8rem 1.45rem 1.5rem;
+  padding: 1.35rem;
   border-radius: 24px;
-  background: linear-gradient(180deg, var(--paper), var(--paper-strong));
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.5), rgba(248, 246, 240, 0.42)),
+    rgba(255, 255, 255, 0.18);
   border: 1px solid rgba(255, 255, 255, 0.75);
   box-shadow: var(--shadow);
-  backdrop-filter: blur(8px);
+  backdrop-filter: blur(18px) saturate(118%);
   text-align: left;
+}
+
+.composer-card::before,
+.composer-card::after {
+  content: "";
+  position: absolute;
+  pointer-events: none;
+}
+
+.composer-card::before {
+  left: -8%;
+  right: -8%;
+  bottom: 8%;
+  height: 48%;
+  border-radius: 999px;
+  background:
+    radial-gradient(circle at 22% 40%, rgba(225, 172, 127, 0.24), transparent 24%),
+    radial-gradient(circle at 74% 56%, rgba(193, 108, 66, 0.2), transparent 22%),
+    linear-gradient(180deg, rgba(185, 102, 58, 0.08), rgba(160, 84, 45, 0.2));
+  filter: blur(18px);
+  animation: tea-wave 10s ease-in-out infinite alternate;
+}
+
+.composer-card::after {
+  inset: 0;
+  background:
+    linear-gradient(125deg, rgba(255, 255, 255, 0.34), transparent 28%, transparent 72%, rgba(255, 255, 255, 0.16)),
+    radial-gradient(circle at 20% 16%, rgba(255, 255, 255, 0.3), transparent 20%);
+  mix-blend-mode: screen;
+}
+
+.composer-card > * {
+  position: relative;
+  z-index: 1;
 }
 
 .composer-card h2 {
@@ -160,6 +196,7 @@ textarea {
 
 .tea-form {
   display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 0.72rem;
 }
 
@@ -182,6 +219,13 @@ textarea {
 .edit-grid textarea:focus {
   border-color: #d89b84;
   box-shadow: 0 0 0 4px rgba(221, 152, 136, 0.13);
+}
+
+.tea-form input:nth-of-type(3),
+.rating-block,
+.tea-form textarea,
+.submit-button {
+  grid-column: 1 / -1;
 }
 
 .rating-block {
@@ -271,6 +315,10 @@ textarea {
   display: grid;
   gap: 1rem;
   margin-bottom: 1rem;
+}
+
+.flavor-filter {
+  align-items: center;
 }
 
 .review-grid {
@@ -552,11 +600,21 @@ textarea {
   }
 }
 
+@keyframes tea-wave {
+  0% {
+    transform: translate3d(-2%, 0, 0) scaleX(1);
+  }
+  50% {
+    transform: translate3d(3%, -4%, 0) scaleX(1.04);
+  }
+  100% {
+    transform: translate3d(-1%, 3%, 0) scaleX(0.98);
+  }
+}
+
 @media (max-width: 900px) {
-  .hero-stage,
-  .hero-stage-reviews {
-    min-height: 650px;
-    margin-bottom: 260px;
+  .hero-backdrop {
+    aspect-ratio: 1536 / 1028;
   }
 
   .hero-copy {
@@ -566,6 +624,15 @@ textarea {
 
   .hero-copy p {
     max-width: 24rem;
+  }
+
+  .composer-section {
+    margin-top: -7rem;
+  }
+
+  .flavor-board-section,
+  .all-reviews-section {
+    margin-top: 2.25rem;
   }
 
   .review-grid {
@@ -583,15 +650,8 @@ textarea {
     justify-content: center;
   }
 
-  .hero-stage,
-  .hero-stage-reviews {
-    aspect-ratio: auto;
-    min-height: 660px;
-    margin-bottom: 250px;
-  }
-
   .hero-backdrop {
-    min-height: 660px;
+    aspect-ratio: 1536 / 1100;
     object-position: 74% top;
   }
 
@@ -609,17 +669,25 @@ textarea {
     max-width: 15rem;
   }
 
-  .composer-wrap {
-    width: calc(100% - 1rem);
-    transform: translate(-50%, 46%);
+  .composer-section {
+    margin-top: -5.5rem;
   }
 
-  .composer-card {
-    max-width: 390px;
+  .composer-wrap {
+    width: calc(100% - 1rem);
+  }
+
+  .flavor-board-section,
+  .all-reviews-section {
+    margin-top: 1.75rem;
   }
 
   .board-title {
     font-size: 2.8rem;
+  }
+
+  .tea-form {
+    grid-template-columns: 1fr;
   }
 
   .review-grid {

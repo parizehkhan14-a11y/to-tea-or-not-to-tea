@@ -355,6 +355,7 @@ function App() {
   const [isLoading, setIsLoading] = useState(true);
   const [page, setPage] = usePageState();
   const [sortMode, setSortMode] = useState("latest");
+  const [activeFlavor, setActiveFlavor] = useState("all");
   const [form, setForm] = useState(emptyForm());
   const [editingId, setEditingId] = useState(null);
   const [editForm, setEditForm] = useState(emptyForm());
@@ -385,7 +386,15 @@ function App() {
   }, [entries, isLoading]);
 
   const featuredEntries = useMemo(() => [...entries].sort(byNewest).slice(0, 3), [entries]);
-  const allSortedEntries = useMemo(() => sortEntries(entries, sortMode), [entries, sortMode]);
+  const availableFlavors = useMemo(
+    () => [...new Set(entries.map((entry) => normalizeFlavor(entry.flavor)))].sort((a, b) => a.localeCompare(b)),
+    [entries]
+  );
+  const filteredEntries = useMemo(
+    () => (activeFlavor === "all" ? entries : entries.filter((entry) => normalizeFlavor(entry.flavor) === activeFlavor)),
+    [entries, activeFlavor]
+  );
+  const allSortedEntries = useMemo(() => sortEntries(filteredEntries, sortMode), [filteredEntries, sortMode]);
 
   function updateField(event) {
     const { name, value } = event.target;
@@ -459,109 +468,117 @@ function App() {
     "main",
     { className: "design-shell" },
     React.createElement(PageNav, { page, onChangePage: setPage }),
-    React.createElement(
-      "section",
-      { className: page === "home" ? "hero-stage" : "hero-stage hero-stage-reviews" },
-      React.createElement("img", {
-        className: "hero-backdrop",
-        src: "./assets/backdrop.png",
-        alt: "",
-        "aria-hidden": true,
-      }),
-      React.createElement(
-        "div",
-        { className: "hero-copy" },
-        React.createElement("h1", null, "To Tea or", React.createElement("br"), "Not to Tea"),
-        React.createElement(
-          "p",
+    page === "home"
+      ? React.createElement(
+          React.Fragment,
           null,
-          "A bright little home for every iced tea crush,",
-          React.createElement("br"),
-          "surprise favorite, and politely disappointing sip."
-        )
-      ),
-      React.createElement(
-        "div",
-        { className: "composer-wrap" },
-        React.createElement(
-          "div",
-          { className: "composer-card" },
-          React.createElement("h2", null, "Add a fresh tea bubble"),
           React.createElement(
-            "form",
-            { className: "tea-form", onSubmit: submitEntry },
-            React.createElement("input", {
-              type: "text",
-              name: "flavor",
-              placeholder: "Flavor (e.g., Peach, passionfruit)",
-              value: form.flavor,
-              onChange: updateField,
-              required: true,
-            }),
-            React.createElement("input", {
-              type: "text",
-              name: "location",
-              placeholder: "Location (e.g., Where did you get it?)",
-              value: form.location,
-              onChange: updateField,
-              required: true,
-            }),
-            React.createElement("input", {
-              type: "text",
-              name: "drinkName",
-              placeholder: "Drink name (e.g., What was it called?)",
-              value: form.drinkName,
-              onChange: updateField,
-              required: true,
+            "section",
+            { className: "hero-stage" },
+            React.createElement("img", {
+              className: "hero-backdrop",
+              src: "./assets/backdrop.png",
+              alt: "",
+              "aria-hidden": true,
             }),
             React.createElement(
               "div",
-              { className: "rating-block" },
-              React.createElement("span", null, "Overall rating"),
-              React.createElement(StarDisplay, {
-                rating: form.rating,
-                interactive: true,
-                onChange: (value) => setForm((current) => ({ ...current, rating: value })),
-              })
-            ),
-            React.createElement("textarea", {
-              name: "thoughts",
-              rows: 5,
-              placeholder: "Thoughts",
-              value: form.thoughts,
-              onChange: updateField,
-              required: true,
+              { className: "hero-copy" },
+              React.createElement("h1", null, "To Tea or", React.createElement("br"), "Not to Tea"),
+              React.createElement(
+                "p",
+                null,
+                "A bright little home for every iced tea crush,",
+                React.createElement("br"),
+                "surprise favorite, and politely disappointing sip."
+              )
+            )
+          ),
+          React.createElement(
+            "section",
+            { className: "composer-section" },
+            React.createElement(
+              "div",
+              { className: "composer-wrap" },
+              React.createElement(
+                "div",
+                { className: "composer-card" },
+                React.createElement("h2", null, "Add a fresh tea bubble"),
+                React.createElement(
+                  "form",
+                  { className: "tea-form", onSubmit: submitEntry },
+                  React.createElement("input", {
+                    type: "text",
+                    name: "flavor",
+                    placeholder: "Flavor (e.g., Peach, passionfruit)",
+                    value: form.flavor,
+                    onChange: updateField,
+                    required: true,
+                  }),
+                  React.createElement("input", {
+                    type: "text",
+                    name: "location",
+                    placeholder: "Location (e.g., Where did you get it?)",
+                    value: form.location,
+                    onChange: updateField,
+                    required: true,
+                  }),
+                  React.createElement("input", {
+                    type: "text",
+                    name: "drinkName",
+                    placeholder: "Drink name (e.g., What was it called?)",
+                    value: form.drinkName,
+                    onChange: updateField,
+                    required: true,
+                  }),
+                  React.createElement(
+                    "div",
+                    { className: "rating-block" },
+                    React.createElement("span", null, "Overall rating"),
+                    React.createElement(StarDisplay, {
+                      rating: form.rating,
+                      interactive: true,
+                      onChange: (value) => setForm((current) => ({ ...current, rating: value })),
+                    })
+                  ),
+                  React.createElement("textarea", {
+                    name: "thoughts",
+                    rows: 4,
+                    placeholder: "Thoughts",
+                    value: form.thoughts,
+                    onChange: updateField,
+                    required: true,
+                  }),
+                  React.createElement(
+                    "button",
+                    { className: "submit-button", type: "submit", disabled: !validateDraft(form) },
+                    "Log My Sip"
+                  )
+                )
+              )
+            )
+          ),
+          React.createElement(
+            "section",
+            { className: "flavor-board-section" },
+            React.createElement("h2", { className: "board-title" }, "The Flavor Board"),
+            React.createElement(ReviewsGrid, {
+              entries: featuredEntries,
+              editingId,
+              editForm,
+              onStartEdit: startEdit,
+              onCancelEdit: cancelEdit,
+              onSaveEdit: saveEdit,
+              onEditChange: updateEditField,
             }),
             React.createElement(
-              "button",
-              { className: "submit-button", type: "submit", disabled: !validateDraft(form) },
-              "Log My Sip"
-            )
-          )
-        )
-      )
-    ),
-    page === "home"
-      ? React.createElement(
-          "section",
-          { className: "flavor-board-section" },
-          React.createElement("h2", { className: "board-title" }, "The Flavor Board"),
-          React.createElement(ReviewsGrid, {
-            entries: featuredEntries,
-            editingId,
-            editForm,
-            onStartEdit: startEdit,
-            onCancelEdit: cancelEdit,
-            onSaveEdit: saveEdit,
-            onEditChange: updateEditField,
-          }),
-          React.createElement(
-            "div",
-            { className: "board-footer" },
-            React.createElement(
-              "button",
-              { type: "button", className: "page-chip active", onClick: () => setPage("reviews") },
-              "See All Reviews"
+              "div",
+              { className: "board-footer" },
+              React.createElement(
+                "button",
+                { type: "button", className: "page-chip active", onClick: () => setPage("reviews") },
+                "See All Reviews"
+              )
             )
           )
         )
@@ -619,6 +636,31 @@ function App() {
                   onClick: () => setSortMode("location"),
                 },
                 "Location"
+              )
+            ),
+            React.createElement(
+              "div",
+              { className: "flavor-filter" },
+              React.createElement(
+                "button",
+                {
+                  type: "button",
+                  className: activeFlavor === "all" ? "sort-chip active" : "sort-chip",
+                  onClick: () => setActiveFlavor("all"),
+                },
+                "All Flavors"
+              ),
+              availableFlavors.map((flavor) =>
+                React.createElement(
+                  "button",
+                  {
+                    key: flavor,
+                    type: "button",
+                    className: activeFlavor === flavor ? "sort-chip active" : "sort-chip",
+                    onClick: () => setActiveFlavor(flavor),
+                  },
+                  flavor
+                )
               )
             )
           ),
