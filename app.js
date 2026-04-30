@@ -266,7 +266,7 @@ function PageNav({ page, onChangePage }) {
   );
 }
 
-function ReviewBubble({ entry, isEditing, editForm, onStartEdit, onCancelEdit, onSaveEdit, onEditChange }) {
+function ReviewBubble({ entry, isEditing, editForm, onStartEdit, onCancelEdit, onSaveEdit, onDeleteEdit, onEditChange }) {
   const liveEntry = isEditing ? { ...entry, ...editForm } : entry;
   const theme = resolveTheme(liveEntry.flavor);
 
@@ -341,6 +341,11 @@ function ReviewBubble({ entry, isEditing, editForm, onStartEdit, onCancelEdit, o
           { className: "bubble-actions" },
           React.createElement(
             "button",
+            { className: "bubble-button bubble-button-danger", type: "button", onClick: onDeleteEdit },
+            "Delete"
+          ),
+          React.createElement(
+            "button",
             { className: "bubble-button bubble-button-ghost", type: "button", onClick: onCancelEdit },
             "Cancel"
           ),
@@ -374,7 +379,7 @@ function ReviewBubble({ entry, isEditing, editForm, onStartEdit, onCancelEdit, o
   );
 }
 
-function ReviewsGrid({ entries, editingId, editForm, onStartEdit, onCancelEdit, onSaveEdit, onEditChange }) {
+function ReviewsGrid({ entries, editingId, editForm, onStartEdit, onCancelEdit, onSaveEdit, onDeleteEdit, onEditChange }) {
   return React.createElement(
     "div",
     { className: "review-grid" },
@@ -387,6 +392,7 @@ function ReviewsGrid({ entries, editingId, editForm, onStartEdit, onCancelEdit, 
         onStartEdit: () => onStartEdit(entry),
         onCancelEdit,
         onSaveEdit: () => onSaveEdit(entry.id),
+        onDeleteEdit: () => onDeleteEdit(entry.id),
         onEditChange,
       })
     )
@@ -659,6 +665,30 @@ function App() {
     }
   }
 
+  async function deleteEdit(entryId) {
+    const confirmed = window.confirm("Delete this tea review?");
+    if (!confirmed) {
+      return;
+    }
+
+    const nextEntries = entries.filter((entry) => entry.id !== entryId);
+    setEntries(nextEntries);
+    cancelEdit();
+
+    try {
+      const { error } = await teaStore.rpc("delete_tea_review_admin", {
+        review_id: entryId,
+        admin_password: "Princesspeach",
+      });
+
+      if (error) {
+        throw error;
+      }
+    } catch {
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(nextEntries));
+    }
+  }
+
   if (isLoading) {
     return React.createElement(Loader);
   }
@@ -782,6 +812,7 @@ function App() {
               onStartEdit: startEdit,
               onCancelEdit: cancelEdit,
               onSaveEdit: saveEdit,
+              onDeleteEdit: deleteEdit,
               onEditChange: updateEditField,
             }),
             React.createElement(
@@ -920,6 +951,7 @@ function App() {
             onStartEdit: startEdit,
             onCancelEdit: cancelEdit,
             onSaveEdit: saveEdit,
+            onDeleteEdit: deleteEdit,
             onEditChange: updateEditField,
           })
         )

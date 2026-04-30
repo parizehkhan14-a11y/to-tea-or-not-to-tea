@@ -117,9 +117,17 @@ textarea {
 
 .hero-copy p {
   margin: 1rem 0 0;
+  color: #fffaf0;
   font-size: clamp(1rem, 1.8vw, 1.55rem);
+  font-weight: 900;
   line-height: 1.08;
   max-width: 31rem;
+  text-shadow:
+    -1px -1px 0 #1c130d,
+    1px -1px 0 #1c130d,
+    -1px 1px 0 #1c130d,
+    1px 1px 0 #1c130d,
+    0 3px 8px rgba(28, 19, 13, 0.28);
 }
 
 .composer-section {
@@ -461,6 +469,11 @@ textarea {
 .bubble-button-ghost {
   background: white;
   color: var(--ink);
+}
+
+.bubble-button-danger {
+  margin-right: auto;
+  background: linear-gradient(180deg, #c95f52, #a94239);
 }
 
 .admin-modal-backdrop {
