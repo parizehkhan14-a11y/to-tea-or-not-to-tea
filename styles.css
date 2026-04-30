@@ -95,7 +95,7 @@ textarea {
 .hero-backdrop {
   display: block;
   width: 100%;
-  height: clamp(420px, 50vw, 650px);
+  height: clamp(360px, 42vw, 560px);
   object-fit: cover;
   object-position: center top;
 }
@@ -126,8 +126,8 @@ textarea {
 .composer-section {
   position: relative;
   z-index: 2;
-  margin-top: -5.25rem;
-  margin-bottom: 1.5rem;
+  margin-top: -3rem;
+  margin-bottom: 0.75rem;
   display: flex;
   justify-content: center;
 }
@@ -299,7 +299,7 @@ textarea {
 
 .flavor-board-section,
 .all-reviews-section {
-  margin-top: 0;
+  margin-top: 0.25rem;
 }
 
 .board-title {
@@ -630,7 +630,7 @@ textarea {
 
 @media (max-width: 900px) {
   .hero-backdrop {
-    height: clamp(380px, 55vw, 520px);
+    height: clamp(330px, 48vw, 450px);
   }
 
   .hero-copy {
@@ -643,12 +643,12 @@ textarea {
   }
 
   .composer-section {
-    margin-top: -4.5rem;
+    margin-top: -2.4rem;
   }
 
   .flavor-board-section,
   .all-reviews-section {
-    margin-top: 2.25rem;
+    margin-top: 0.85rem;
   }
 
   .review-grid {
@@ -667,7 +667,7 @@ textarea {
   }
 
   .hero-backdrop {
-    height: 360px;
+    height: 300px;
     object-position: 74% top;
   }
 
@@ -686,7 +686,7 @@ textarea {
   }
 
   .composer-section {
-    margin-top: -3.5rem;
+    margin-top: -1.5rem;
   }
 
   .composer-wrap {
@@ -695,7 +695,7 @@ textarea {
 
   .flavor-board-section,
   .all-reviews-section {
-    margin-top: 1.75rem;
+    margin-top: 0.75rem;
   }
 
   .board-title {
