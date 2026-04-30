@@ -727,14 +727,7 @@ function App() {
             React.createElement(
               "div",
               { className: "hero-copy" },
-              React.createElement("h1", null, "To Tea or", React.createElement("br"), "Not to Tea"),
-              React.createElement(
-                "p",
-                null,
-                "A bright little home for every iced tea crush,",
-                React.createElement("br"),
-                "surprise favorite, and politely disappointing sip."
-              )
+              React.createElement("h1", null, "To Tea or", React.createElement("br"), "Not to Tea")
             ),
             React.createElement(
               "section",

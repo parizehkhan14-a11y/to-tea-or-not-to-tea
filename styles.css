@@ -115,21 +115,6 @@ textarea {
   letter-spacing: -0.04em;
 }
 
-.hero-copy p {
-  margin: 1rem 0 0;
-  color: #fffaf0;
-  font-size: clamp(1rem, 1.8vw, 1.55rem);
-  font-weight: 900;
-  line-height: 1.08;
-  max-width: 31rem;
-  text-shadow:
-    -1px -1px 0 #1c130d,
-    1px -1px 0 #1c130d,
-    -1px 1px 0 #1c130d,
-    1px 1px 0 #1c130d,
-    0 3px 8px rgba(28, 19, 13, 0.28);
-}
-
 .composer-section {
   position: absolute;
   left: 50%;
@@ -706,10 +691,6 @@ textarea {
     top: 2rem;
   }
 
-  .hero-copy p {
-    max-width: 24rem;
-  }
-
   .composer-section {
     transform: translate(-50%, 47%);
   }
@@ -746,11 +727,6 @@ textarea {
 
   .hero-copy h1 {
     font-size: 3.3rem;
-  }
-
-  .hero-copy p {
-    font-size: 0.95rem;
-    max-width: min(17rem, calc(100vw - 2.5rem));
   }
 
   .composer-section {
