@@ -3,6 +3,7 @@ import { createRoot } from "https://esm.sh/react-dom@18.3.1/client";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.105.1";
 
 const STORAGE_KEY = "to-tea-or-not-to-tea.entries";
+const ADMIN_SESSION_KEY = "to-tea-or-not-to-tea.admin";
 const SUPABASE_URL = "https://alwrxbaduximegobhcak.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_gt3t5UkG4ZYcvxHUnzjm8g_t0dspVif";
 const teaStore = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
@@ -392,6 +393,33 @@ function ReviewsGrid({ entries, editingId, editForm, onStartEdit, onCancelEdit, 
   );
 }
 
+function AdminLoginModal({ password, error, onPasswordChange, onCancel, onSubmit }) {
+  return React.createElement(
+    "div",
+    { className: "admin-modal-backdrop", role: "presentation" },
+    React.createElement(
+      "form",
+      { className: "admin-modal", onSubmit },
+      React.createElement("h2", null, "Admin login"),
+      React.createElement("p", null, "Enter the admin password to edit this review."),
+      React.createElement("input", {
+        type: "password",
+        value: password,
+        onChange: onPasswordChange,
+        placeholder: "Password",
+        autoFocus: true,
+      }),
+      error && React.createElement("p", { className: "admin-error" }, error),
+      React.createElement(
+        "div",
+        { className: "admin-actions" },
+        React.createElement("button", { type: "button", className: "bubble-button bubble-button-ghost", onClick: onCancel }, "Cancel"),
+        React.createElement("button", { type: "submit", className: "bubble-button" }, "Unlock")
+      )
+    )
+  );
+}
+
 function App() {
   const [entries, setEntries] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -402,12 +430,20 @@ function App() {
   const [form, setForm] = useState(emptyForm());
   const [editingId, setEditingId] = useState(null);
   const [editForm, setEditForm] = useState(emptyForm());
+  const [isAdminUnlocked, setIsAdminUnlocked] = useState(() => window.sessionStorage.getItem(ADMIN_SESSION_KEY) === "true");
+  const [pendingEditEntry, setPendingEditEntry] = useState(null);
+  const [adminPassword, setAdminPassword] = useState("");
+  const [adminError, setAdminError] = useState("");
 
   useEffect(() => {
     let ignore = false;
 
     async function loadEntries() {
       const fallbackEntries = readLocalEntries();
+      const immediateEntries = fallbackEntries.length > 0 ? fallbackEntries : starterEntries;
+
+      setEntries(immediateEntries);
+      setIsLoading(false);
 
       try {
         const { data, error } = await teaStore
@@ -421,21 +457,17 @@ function App() {
 
         if (!ignore && data.length > 0) {
           setEntries(data.map(rowToEntry));
-          setIsLoading(false);
           return;
         }
 
-        const seedEntries = fallbackEntries.length > 0 ? fallbackEntries : starterEntries;
-        await teaStore.from("tea_reviews").upsert(seedEntries.map(entryToRow), { onConflict: "id" });
+        await teaStore.from("tea_reviews").upsert(immediateEntries.map(entryToRow), { onConflict: "id" });
 
         if (!ignore) {
-          setEntries(seedEntries);
-          setIsLoading(false);
+          setEntries(immediateEntries);
         }
       } catch {
         if (!ignore) {
-          setEntries(fallbackEntries.length > 0 ? fallbackEntries : starterEntries);
-          setIsLoading(false);
+          setEntries(immediateEntries);
         }
       }
     }
@@ -526,9 +558,42 @@ function App() {
     }
   }
 
-  function startEdit(entry) {
+  function openEdit(entry) {
     setEditingId(entry.id);
     setEditForm(toEntryDraft(entry));
+  }
+
+  function startEdit(entry) {
+    if (isAdminUnlocked) {
+      openEdit(entry);
+      return;
+    }
+
+    setPendingEditEntry(entry);
+    setAdminPassword("");
+    setAdminError("");
+  }
+
+  function cancelAdminLogin() {
+    setPendingEditEntry(null);
+    setAdminPassword("");
+    setAdminError("");
+  }
+
+  function submitAdminLogin(event) {
+    event.preventDefault();
+
+    if (adminPassword !== "Princesspeach") {
+      setAdminError("Wrong password.");
+      return;
+    }
+
+    setIsAdminUnlocked(true);
+    window.sessionStorage.setItem(ADMIN_SESSION_KEY, "true");
+    if (pendingEditEntry) {
+      openEdit(pendingEditEntry);
+    }
+    cancelAdminLogin();
   }
 
   function cancelEdit() {
@@ -576,16 +641,15 @@ function App() {
     }
 
     try {
-      const { error } = await teaStore
-        .from("tea_reviews")
-        .update({
-          flavor: updatedEntry.flavor,
-          location: updatedEntry.location,
-          drink_name: updatedEntry.drinkName,
-          rating: updatedEntry.rating,
-          thoughts: updatedEntry.thoughts,
-        })
-        .eq("id", entryId);
+      const { error } = await teaStore.rpc("update_tea_review_admin", {
+        review_id: entryId,
+        admin_password: "Princesspeach",
+        next_flavor: updatedEntry.flavor,
+        next_location: updatedEntry.location,
+        next_drink_name: updatedEntry.drinkName,
+        next_rating: updatedEntry.rating,
+        next_thoughts: updatedEntry.thoughts,
+      });
 
       if (error) {
         throw error;
@@ -609,6 +673,14 @@ function App() {
         setPage(nextPage);
       },
     }),
+    pendingEditEntry &&
+      React.createElement(AdminLoginModal, {
+        password: adminPassword,
+        error: adminError,
+        onPasswordChange: (event) => setAdminPassword(event.target.value),
+        onCancel: cancelAdminLogin,
+        onSubmit: submitAdminLogin,
+      }),
     page === "home"
       ? React.createElement(
           React.Fragment,

@@ -463,6 +463,59 @@ textarea {
   color: var(--ink);
 }
 
+.admin-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  background: rgba(34, 23, 15, 0.28);
+  backdrop-filter: blur(8px);
+}
+
+.admin-modal {
+  width: min(100%, 360px);
+  display: grid;
+  gap: 0.8rem;
+  padding: 1.25rem;
+  border-radius: 24px;
+  background: rgba(255, 250, 242, 0.96);
+  border: 1px solid rgba(255, 255, 255, 0.75);
+  box-shadow: 0 22px 46px rgba(68, 45, 28, 0.24);
+}
+
+.admin-modal h2,
+.admin-modal p {
+  margin: 0;
+}
+
+.admin-modal h2 {
+  font-size: 1.7rem;
+  line-height: 1;
+}
+
+.admin-modal input {
+  width: 100%;
+  border: 1.5px solid #d7d3c9;
+  border-radius: 16px;
+  padding: 0.85rem 1rem;
+  background: rgba(255, 255, 255, 0.92);
+  color: var(--ink);
+  outline: none;
+}
+
+.admin-error {
+  color: #b04737;
+  font-weight: 900;
+}
+
+.admin-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.6rem;
+}
+
 .loader-screen {
   min-height: 100vh;
   display: grid;
@@ -693,7 +746,7 @@ textarea {
     bottom: auto;
     z-index: 3;
     width: 100%;
-    margin: -1.75rem auto 0;
+    margin: 0.85rem auto 0;
     padding: 0 1rem;
     transform: none;
   }
