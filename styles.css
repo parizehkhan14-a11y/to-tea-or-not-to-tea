@@ -88,17 +88,16 @@ textarea {
 
 .hero-stage {
   position: relative;
-  aspect-ratio: 1536 / 1028;
-  min-height: 720px;
+  min-height: 0;
   margin-bottom: 0;
 }
 
 .hero-backdrop {
   display: block;
   width: 100%;
-  height: 100%;
+  height: clamp(420px, 50vw, 650px);
   object-fit: cover;
-  object-position: top center;
+  object-position: center top;
 }
 
 .hero-copy {
@@ -127,8 +126,8 @@ textarea {
 .composer-section {
   position: relative;
   z-index: 2;
-  margin-top: -8rem;
-  margin-bottom: 2rem;
+  margin-top: -5.25rem;
+  margin-bottom: 1.5rem;
   display: flex;
   justify-content: center;
 }
@@ -318,7 +317,24 @@ textarea {
 }
 
 .flavor-filter {
+  position: relative;
   align-items: center;
+}
+
+.flavor-menu {
+  position: absolute;
+  top: calc(100% + 0.6rem);
+  left: 0;
+  z-index: 10;
+  min-width: 220px;
+  padding: 0.7rem;
+  display: grid;
+  gap: 0.55rem;
+  border-radius: 18px;
+  background: rgba(255, 251, 246, 0.96);
+  border: 1px solid rgba(188, 150, 117, 0.18);
+  box-shadow: 0 16px 28px rgba(112, 84, 58, 0.14);
+  backdrop-filter: blur(10px);
 }
 
 .review-grid {
@@ -614,7 +630,7 @@ textarea {
 
 @media (max-width: 900px) {
   .hero-backdrop {
-    aspect-ratio: 1536 / 1028;
+    height: clamp(380px, 55vw, 520px);
   }
 
   .hero-copy {
@@ -627,7 +643,7 @@ textarea {
   }
 
   .composer-section {
-    margin-top: -7rem;
+    margin-top: -4.5rem;
   }
 
   .flavor-board-section,
@@ -651,7 +667,7 @@ textarea {
   }
 
   .hero-backdrop {
-    aspect-ratio: 1536 / 1100;
+    height: 360px;
     object-position: 74% top;
   }
 
@@ -670,7 +686,7 @@ textarea {
   }
 
   .composer-section {
-    margin-top: -5.5rem;
+    margin-top: -3.5rem;
   }
 
   .composer-wrap {
@@ -692,5 +708,9 @@ textarea {
 
   .review-grid {
     grid-template-columns: 1fr;
+  }
+
+  .flavor-menu {
+    min-width: 190px;
   }
 }

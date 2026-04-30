@@ -356,6 +356,7 @@ function App() {
   const [page, setPage] = usePageState();
   const [sortMode, setSortMode] = useState("latest");
   const [activeFlavor, setActiveFlavor] = useState("all");
+  const [flavorMenuOpen, setFlavorMenuOpen] = useState(false);
   const [form, setForm] = useState(emptyForm());
   const [editingId, setEditingId] = useState(null);
   const [editForm, setEditForm] = useState(emptyForm());
@@ -645,23 +646,43 @@ function App() {
                 "button",
                 {
                   type: "button",
-                  className: activeFlavor === "all" ? "sort-chip active" : "sort-chip",
-                  onClick: () => setActiveFlavor("all"),
+                  className: flavorMenuOpen ? "sort-chip active" : "sort-chip",
+                  onClick: () => setFlavorMenuOpen((current) => !current),
                 },
-                "All Flavors"
+                activeFlavor === "all" ? "Flavor Filter" : `Flavor: ${activeFlavor}`
               ),
-              availableFlavors.map((flavor) =>
+              flavorMenuOpen &&
                 React.createElement(
-                  "button",
-                  {
-                    key: flavor,
-                    type: "button",
-                    className: activeFlavor === flavor ? "sort-chip active" : "sort-chip",
-                    onClick: () => setActiveFlavor(flavor),
-                  },
-                  flavor
+                  "div",
+                  { className: "flavor-menu" },
+                  React.createElement(
+                    "button",
+                    {
+                      type: "button",
+                      className: activeFlavor === "all" ? "sort-chip active" : "sort-chip",
+                      onClick: () => {
+                        setActiveFlavor("all");
+                        setFlavorMenuOpen(false);
+                      },
+                    },
+                    "All Flavors"
+                  ),
+                  availableFlavors.map((flavor) =>
+                    React.createElement(
+                      "button",
+                      {
+                        key: flavor,
+                        type: "button",
+                        className: activeFlavor === flavor ? "sort-chip active" : "sort-chip",
+                        onClick: () => {
+                          setActiveFlavor(flavor);
+                          setFlavorMenuOpen(false);
+                        },
+                      },
+                      flavor
+                    )
+                  )
                 )
-              )
             )
           ),
           React.createElement(ReviewsGrid, {
