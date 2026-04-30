@@ -1,7 +1,11 @@
 import React, { useEffect, useMemo, useState } from "https://esm.sh/react@18.3.1";
 import { createRoot } from "https://esm.sh/react-dom@18.3.1/client";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.105.1";
 
 const STORAGE_KEY = "to-tea-or-not-to-tea.entries";
+const SUPABASE_URL = "https://alwrxbaduximegobhcak.supabase.co";
+const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_gt3t5UkG4ZYcvxHUnzjm8g_t0dspVif";
+const teaStore = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
 
 const starterEntries = [
   {
@@ -69,6 +73,44 @@ function toEntryDraft(entry) {
     rating: entry.rating,
     thoughts: entry.thoughts,
   };
+}
+
+function rowToEntry(row) {
+  return {
+    id: row.id,
+    flavor: row.flavor,
+    location: row.location,
+    drinkName: row.drink_name,
+    rating: row.rating,
+    thoughts: row.thoughts,
+    createdAt: row.created_at,
+  };
+}
+
+function entryToRow(entry) {
+  return {
+    id: entry.id,
+    flavor: entry.flavor,
+    location: entry.location,
+    drink_name: entry.drinkName,
+    rating: entry.rating,
+    thoughts: entry.thoughts,
+    created_at: entry.createdAt,
+  };
+}
+
+function readLocalEntries() {
+  const stored = window.localStorage.getItem(STORAGE_KEY);
+  if (!stored) {
+    return [];
+  }
+
+  try {
+    const parsedEntries = JSON.parse(stored);
+    return Array.isArray(parsedEntries) ? parsedEntries : [];
+  } catch {
+    return [];
+  }
 }
 
 function validateDraft(draft) {
@@ -362,22 +404,73 @@ function App() {
   const [editForm, setEditForm] = useState(emptyForm());
 
   useEffect(() => {
-    const timeoutId = window.setTimeout(() => {
-      const stored = window.localStorage.getItem(STORAGE_KEY);
-      if (stored) {
-        try {
-          const parsedEntries = JSON.parse(stored);
-          setEntries(Array.isArray(parsedEntries) && parsedEntries.length > 0 ? parsedEntries : starterEntries);
-        } catch {
-          setEntries(starterEntries);
-        }
-      } else {
-        setEntries(starterEntries);
-      }
-      setIsLoading(false);
-    }, 900);
+    let ignore = false;
 
-    return () => window.clearTimeout(timeoutId);
+    async function loadEntries() {
+      const fallbackEntries = readLocalEntries();
+
+      try {
+        const { data, error } = await teaStore
+          .from("tea_reviews")
+          .select("*")
+          .order("created_at", { ascending: false });
+
+        if (error) {
+          throw error;
+        }
+
+        if (!ignore && data.length > 0) {
+          setEntries(data.map(rowToEntry));
+          setIsLoading(false);
+          return;
+        }
+
+        const seedEntries = fallbackEntries.length > 0 ? fallbackEntries : starterEntries;
+        await teaStore.from("tea_reviews").upsert(seedEntries.map(entryToRow), { onConflict: "id" });
+
+        if (!ignore) {
+          setEntries(seedEntries);
+          setIsLoading(false);
+        }
+      } catch {
+        if (!ignore) {
+          setEntries(fallbackEntries.length > 0 ? fallbackEntries : starterEntries);
+          setIsLoading(false);
+        }
+      }
+    }
+
+    loadEntries();
+
+    return () => {
+      ignore = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    const channel = teaStore
+      .channel("tea-reviews-live")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "tea_reviews" },
+        (payload) => {
+          if (payload.eventType === "DELETE") {
+            setEntries((current) => current.filter((entry) => entry.id !== payload.old.id));
+            return;
+          }
+
+          const nextEntry = rowToEntry(payload.new);
+          setEntries((current) => {
+            const withoutChanged = current.filter((entry) => entry.id !== nextEntry.id);
+            return [nextEntry, ...withoutChanged].sort(byNewest);
+          });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      teaStore.removeChannel(channel);
+    };
   }, []);
 
   useEffect(() => {
@@ -402,7 +495,7 @@ function App() {
     setForm((current) => ({ ...current, [name]: name === "rating" ? Number(value) : value }));
   }
 
-  function submitEntry(event) {
+  async function submitEntry(event) {
     event.preventDefault();
     if (!validateDraft(form)) {
       return;
@@ -418,10 +511,19 @@ function App() {
       createdAt: new Date().toISOString(),
     };
 
-    setEntries((current) => [nextEntry, ...current]);
+    setEntries((current) => [nextEntry, ...current].sort(byNewest));
     setForm(emptyForm());
     setFlavorMenuOpen(false);
     setPage("reviews");
+
+    try {
+      const { error } = await teaStore.from("tea_reviews").insert(entryToRow(nextEntry));
+      if (error) {
+        throw error;
+      }
+    } catch {
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify([nextEntry, ...entries].sort(byNewest)));
+    }
   }
 
   function startEdit(entry) {
@@ -439,27 +541,58 @@ function App() {
     setEditForm((current) => ({ ...current, [name]: name === "rating" ? Number(value) : value }));
   }
 
-  function saveEdit(entryId) {
+  async function saveEdit(entryId) {
     if (!validateDraft(editForm)) {
       return;
     }
 
+    let updatedEntry = null;
+
     setEntries((current) =>
-      current.map((entry) =>
-        entry.id === entryId
-          ? {
+      current
+        .map((entry) => {
+          if (entry.id !== entryId) {
+            return entry;
+          }
+
+          updatedEntry = {
               ...entry,
               flavor: normalizeFlavor(editForm.flavor),
               location: editForm.location.trim(),
               drinkName: editForm.drinkName.trim(),
               rating: Number(editForm.rating),
               thoughts: editForm.thoughts.trim(),
-            }
-          : entry
-      )
+            };
+
+          return updatedEntry;
+        })
+        .sort(byNewest)
     );
 
     cancelEdit();
+
+    if (!updatedEntry) {
+      return;
+    }
+
+    try {
+      const { error } = await teaStore
+        .from("tea_reviews")
+        .update({
+          flavor: updatedEntry.flavor,
+          location: updatedEntry.location,
+          drink_name: updatedEntry.drinkName,
+          rating: updatedEntry.rating,
+          thoughts: updatedEntry.thoughts,
+        })
+        .eq("id", entryId);
+
+      if (error) {
+        throw error;
+      }
+    } catch {
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(entries.map((entry) => (entry.id === entryId ? updatedEntry : entry))));
+    }
   }
 
   if (isLoading) {

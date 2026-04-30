@@ -26,6 +26,7 @@ body {
   color: var(--ink);
   font-family: "Nunito", sans-serif;
   background: linear-gradient(180deg, #fbf5e8 0%, #fff4e4 42%, #f9eddc 100%);
+  overflow-x: hidden;
 }
 
 body::before {
@@ -659,7 +660,7 @@ textarea {
 
 @media (max-width: 640px) {
   .design-shell {
-    width: min(100% - 1rem, 100%);
+    width: 100%;
     padding-top: 1rem;
   }
 
@@ -668,7 +669,8 @@ textarea {
   }
 
   .hero-stage {
-    padding-bottom: 16rem;
+    padding-bottom: 0;
+    margin-bottom: 1.1rem;
   }
 
   .hero-copy {
@@ -682,25 +684,43 @@ textarea {
 
   .hero-copy p {
     font-size: 0.95rem;
-    max-width: 15rem;
+    max-width: min(17rem, calc(100vw - 2.5rem));
   }
 
   .composer-section {
-    transform: translate(-50%, 52%);
-    padding: 0 0.5rem;
+    position: relative;
+    left: auto;
+    bottom: auto;
+    z-index: 3;
+    width: 100%;
+    margin: -1.75rem auto 0;
+    padding: 0 1rem;
+    transform: none;
   }
 
   .composer-wrap {
-    width: min(calc(100% - 0.5rem), 420px);
+    width: min(100%, 360px);
+    max-width: calc(100vw - 2rem);
+  }
+
+  .composer-card {
+    padding: 1.25rem;
+  }
+
+  .composer-card h2 {
+    font-size: 2.15rem;
   }
 
   .flavor-board-section,
   .all-reviews-section {
-    margin-top: 0.2rem;
+    margin-top: 1rem;
   }
 
   .board-title {
-    font-size: 2.8rem;
+    font-size: 2rem;
+    line-height: 1.02;
+    overflow-wrap: anywhere;
+    padding: 0 1rem;
   }
 
   .tea-form {
@@ -709,6 +729,7 @@ textarea {
 
   .review-grid {
     grid-template-columns: 1fr;
+    padding: 0 1rem;
   }
 
   .flavor-menu {
