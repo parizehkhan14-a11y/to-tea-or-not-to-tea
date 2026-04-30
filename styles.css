@@ -26,11 +26,7 @@ body {
   min-height: 100vh;
   color: var(--ink);
   font-family: "Nunito", sans-serif;
-  background:
-    radial-gradient(circle at 15% 18%, rgba(255, 255, 255, 0.36), transparent 28%),
-    radial-gradient(circle at 82% 24%, rgba(255, 214, 168, 0.23), transparent 22%),
-    radial-gradient(circle at 50% 90%, rgba(255, 170, 139, 0.1), transparent 18%),
-    linear-gradient(180deg, #fbf5e8 0%, #fff4e4 40%, #f9eddc 100%);
+  background: linear-gradient(180deg, #fbf5e8 0%, #fff4e4 42%, #f9eddc 100%);
 }
 
 body::before {
@@ -55,19 +51,31 @@ textarea {
 .design-shell {
   width: min(1120px, calc(100% - 1.5rem));
   margin: 0 auto;
-  padding: 3rem 0 5rem;
+  padding: 2rem 0 5rem;
 }
 
-.hero-section {
-  display: grid;
-  grid-template-columns: 1.2fr 0.8fr;
-  align-items: start;
-  gap: 1rem;
+.hero-stage {
   position: relative;
+  min-height: 920px;
+}
+
+.hero-backdrop {
+  width: 100%;
+  display: block;
+  object-fit: cover;
+  object-position: top center;
+  border-radius: 0;
 }
 
 .hero-copy h1 {
   font-family: "DM Serif Display", serif;
+}
+
+.hero-copy {
+  position: absolute;
+  left: 4.2rem;
+  top: 2.4rem;
+  z-index: 2;
 }
 
 .hero-copy h1 {
@@ -85,66 +93,12 @@ textarea {
   max-width: 36rem;
 }
 
-.top-illustration {
-  justify-self: end;
-  position: relative;
-  width: min(300px, 37vw);
-  margin-right: -0.35rem;
-}
-
-.desk-illustration {
-  width: 100%;
-  object-fit: contain;
-  filter: drop-shadow(0 10px 14px rgba(118, 85, 55, 0.1));
-}
-
-.fruit-splash-band {
-  position: relative;
-  height: 190px;
-  margin-top: -0.4rem;
-}
-
-.fruit-splash-band::before {
-  content: "";
-  position: absolute;
-  inset: 34px -3vw 0;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0), rgba(247, 238, 223, 1) 65%);
-  clip-path: polygon(0 62%, 11% 48%, 20% 64%, 32% 36%, 44% 62%, 58% 34%, 69% 56%, 82% 28%, 100% 54%, 100% 100%, 0 100%);
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0), rgba(249, 237, 220, 1) 65%);
-}
-
-.fruit-band-piece,
-.fruit-band-center-sticker {
-  position: absolute;
-  z-index: 1;
-  object-fit: contain;
-  filter: drop-shadow(0 8px 10px rgba(112, 84, 58, 0.1));
-}
-
-.fruit-band-left {
-  left: -1.2rem;
-  top: 1.2rem;
-  width: min(270px, 35vw);
-}
-
-.fruit-band-right {
-  right: -1rem;
-  top: 1.5rem;
-  width: min(230px, 30vw);
-}
-
-.fruit-band-center-sticker {
-  left: 50%;
-  top: 1.6rem;
-  width: 68px;
-  transform: translateX(-50%);
-}
-
 .composer-wrap {
-  position: relative;
-  display: flex;
-  justify-content: center;
-  margin-top: -0.2rem;
+  position: absolute;
+  left: 50%;
+  top: 42%;
+  transform: translateX(-50%);
+  z-index: 2;
 }
 
 .composer-card {
@@ -263,46 +217,8 @@ textarea {
   cursor: not-allowed;
 }
 
-.sticker {
-  position: absolute;
-  width: 78px;
-  filter: drop-shadow(0 8px 8px rgba(114, 82, 60, 0.1));
-}
-
-.sticker-berry-left {
-  left: 8%;
-  top: 18rem;
-}
-
-.sticker-strawberry-left {
-  left: 11%;
-  top: 24rem;
-}
-
-.sticker-peach-left {
-  left: 7%;
-  top: 30rem;
-}
-
-.sticker-blueberry-right {
-  right: 7%;
-  top: 17rem;
-}
-
-.sticker-raspberry-right {
-  right: 7%;
-  top: 23rem;
-  width: 126px;
-}
-
-.sticker-lemon-right {
-  right: 8%;
-  top: 30rem;
-  width: 86px;
-}
-
 .flavor-board-section {
-  margin-top: 4.2rem;
+  margin-top: 0.6rem;
 }
 
 .board-title {
@@ -343,15 +259,15 @@ textarea {
 }
 
 .lemon-pattern {
-  background: center / cover no-repeat url("./assets/reference/card-top-lemon.png");
+  background: center top / cover no-repeat url("./assets/review card - lemon.jpeg");
 }
 
 .passionfruit-pattern {
-  background: center / cover no-repeat url("./assets/reference/card-top-passionfruit.png");
+  background: center top / cover no-repeat url("./assets/review card - passionfruit.jpeg");
 }
 
 .peach-pattern {
-  background: center / cover no-repeat url("./assets/reference/card-top-peach.png");
+  background: center top / cover no-repeat url("./assets/review card - peach.jpeg");
 }
 
 .berry-pattern {
@@ -362,13 +278,12 @@ textarea {
     linear-gradient(180deg, #f1e1cf, #eddbc5);
 }
 
+.lychee-pattern,
 .mango-pattern,
 .signature-pattern,
-.mint-pattern {
-  background:
-    radial-gradient(circle at 22% 30%, rgba(255, 199, 126, 0.9) 0 24px, transparent 25px),
-    radial-gradient(circle at 70% 22%, rgba(142, 193, 105, 0.68) 0 18px, transparent 19px),
-    linear-gradient(180deg, #f6e7d2, #f3e0ca);
+.mint-pattern,
+.berry-pattern {
+  background: center top / cover no-repeat url("./assets/review card - lychee.jpeg");
 }
 
 .card-body {
@@ -608,30 +523,22 @@ textarea {
   }
 }
 
-@media (max-width: 700px) {
-  .hero-section {
-    grid-template-columns: 1fr;
+@media (max-width: 900px) {
+  .hero-stage {
+    min-height: 860px;
   }
 
-  .top-illustration {
-    justify-self: center;
-    width: min(300px, 80vw);
+  .hero-copy {
+    left: 2rem;
+    top: 2rem;
+  }
+
+  .composer-wrap {
+    top: 40%;
   }
 
   .review-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .sticker {
-    display: none;
-  }
-
-  .fruit-band-left {
-    width: 220px;
-  }
-
-  .fruit-band-right {
-    width: 190px;
   }
 }
 
@@ -641,14 +548,33 @@ textarea {
     padding-top: 1.6rem;
   }
 
-  .fruit-splash-band {
-    height: 130px;
+  .hero-stage {
+    min-height: 760px;
   }
 
-  .fruit-band-left,
-  .fruit-band-right,
-  .fruit-band-center-sticker {
-    display: none;
+  .hero-backdrop {
+    min-height: 760px;
+    object-fit: cover;
+    object-position: 72% top;
+  }
+
+  .hero-copy {
+    left: 1rem;
+    top: 1.2rem;
+  }
+
+  .hero-copy h1 {
+    font-size: 3.6rem;
+  }
+
+  .hero-copy p {
+    font-size: 1rem;
+    max-width: 18rem;
+  }
+
+  .composer-wrap {
+    top: 43%;
+    width: calc(100% - 1rem);
   }
 
   .composer-card {

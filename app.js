@@ -39,54 +39,41 @@ const starterEntries = [
 const flavorThemes = {
   peach: {
     accent: "peach",
-    fruit: "🍑",
     pattern: "peach-pattern",
   },
   passionfruit: {
     accent: "passionfruit",
-    fruit: "🥭",
     pattern: "passionfruit-pattern",
   },
   lemon: {
     accent: "lemon",
-    fruit: "🍋",
     pattern: "lemon-pattern",
   },
   strawberry: {
     accent: "berry",
-    fruit: "🍓",
     pattern: "berry-pattern",
   },
   raspberry: {
     accent: "berry",
-    fruit: "🫐",
     pattern: "berry-pattern",
   },
   berry: {
     accent: "berry",
-    fruit: "🫐",
     pattern: "berry-pattern",
   },
   mint: {
     accent: "mint",
-    fruit: "🌿",
     pattern: "mint-pattern",
   },
   mango: {
     accent: "mango",
-    fruit: "🥭",
     pattern: "mango-pattern",
   },
+  lychee: {
+    accent: "lychee",
+    pattern: "lychee-pattern",
+  },
 };
-
-const stickers = [
-  { src: "./assets/reference/sticker-berry-left.png", alt: "Berry sticker", className: "sticker sticker-berry-left" },
-  { src: "./assets/reference/sticker-strawberry-left.png", alt: "Strawberry sticker", className: "sticker sticker-strawberry-left" },
-  { src: "./assets/reference/sticker-peach-left.png", alt: "Peach sticker", className: "sticker sticker-peach-left" },
-  { src: "./assets/reference/sticker-blueberry-right.png", alt: "Blueberry sticker", className: "sticker sticker-blueberry-right" },
-  { src: "./assets/reference/sticker-raspberry-right.png", alt: "Raspberry sticker", className: "sticker sticker-raspberry-right" },
-  { src: "./assets/reference/sticker-lemon-right.png", alt: "Lemon sticker", className: "sticker sticker-lemon-right" },
-];
 
 function normalizeFlavor(flavor) {
   return flavor.trim().replace(/\s+/g, " ");
@@ -143,7 +130,7 @@ function sortFlavorNames(names) {
 }
 
 function resolveTheme(flavor) {
-  return flavorThemes[formatFlavorKey(flavor)] || { accent: "signature", fruit: "🧋", pattern: "signature-pattern" };
+  return flavorThemes[formatFlavorKey(flavor)] || { accent: "signature", pattern: "lychee-pattern" };
 }
 
 function StarDisplay({ rating, interactive = false, onChange }) {
@@ -435,7 +422,13 @@ function App() {
     { className: "design-shell" },
     React.createElement(
       "section",
-      { className: "hero-section" },
+      { className: "hero-stage" },
+      React.createElement("img", {
+        className: "hero-backdrop",
+        src: "./assets/backdrop.png",
+        alt: "",
+        "aria-hidden": true,
+      }),
       React.createElement(
         "div",
         { className: "hero-copy" },
@@ -450,99 +443,63 @@ function App() {
       ),
       React.createElement(
         "div",
-        { className: "top-illustration" },
-        React.createElement("img", {
-          className: "desk-illustration",
-          src: "./assets/reference/desk.png",
-          alt: "Desk illustration with plant, tea cup, and radio",
-        })
-      )
-    ),
-    React.createElement(
-      "div",
-      { className: "fruit-splash-band", "aria-hidden": true },
-      React.createElement("img", {
-        className: "fruit-band-piece fruit-band-left",
-        src: "./assets/reference/fruit-band-left.png",
-        alt: "",
-      }),
-      React.createElement("img", {
-        className: "fruit-band-piece fruit-band-right",
-        src: "./assets/reference/fruit-band-right.png",
-        alt: "",
-      }),
-      React.createElement("img", {
-        className: "fruit-band-center-sticker",
-        src: "./assets/reference/sticker-strawberry-left.png",
-        alt: "",
-      })
-    ),
-    React.createElement(
-      "section",
-      { className: "composer-wrap" },
-      React.createElement(
-        "div",
-        { className: "composer-card" },
-        React.createElement("h2", null, "Add a fresh tea bubble"),
+        { className: "composer-wrap" },
         React.createElement(
-          "form",
-          { className: "tea-form", onSubmit: submitEntry },
-          React.createElement("input", {
-            type: "text",
-            name: "flavor",
-            placeholder: "Flavor (e.g., Peach, passionfruit)",
-            value: form.flavor,
-            onChange: updateField,
-            required: true,
-          }),
-          React.createElement("input", {
-            type: "text",
-            name: "location",
-            placeholder: "Location (e.g., Where did you get it?)",
-            value: form.location,
-            onChange: updateField,
-            required: true,
-          }),
-          React.createElement("input", {
-            type: "text",
-            name: "drinkName",
-            placeholder: "Drink name (e.g., What was it called?)",
-            value: form.drinkName,
-            onChange: updateField,
-            required: true,
-          }),
+          "div",
+          { className: "composer-card" },
+          React.createElement("h2", null, "Add a fresh tea bubble"),
           React.createElement(
-            "div",
-            { className: "rating-block" },
-            React.createElement("span", null, "Overall rating"),
-            React.createElement(StarDisplay, {
-              rating: form.rating,
-              interactive: true,
-              onChange: (value) => setForm((current) => ({ ...current, rating: value })),
-            })
-          ),
-          React.createElement("textarea", {
-            name: "thoughts",
-            rows: 5,
-            placeholder: "Thoughts",
-            value: form.thoughts,
-            onChange: updateField,
-            required: true,
-          }),
-          React.createElement(
-            "button",
-            { className: "submit-button", type: "submit", disabled: !validateDraft(form) },
-            "Log My Sip"
+            "form",
+            { className: "tea-form", onSubmit: submitEntry },
+            React.createElement("input", {
+              type: "text",
+              name: "flavor",
+              placeholder: "Flavor (e.g., Peach, passionfruit)",
+              value: form.flavor,
+              onChange: updateField,
+              required: true,
+            }),
+            React.createElement("input", {
+              type: "text",
+              name: "location",
+              placeholder: "Location (e.g., Where did you get it?)",
+              value: form.location,
+              onChange: updateField,
+              required: true,
+            }),
+            React.createElement("input", {
+              type: "text",
+              name: "drinkName",
+              placeholder: "Drink name (e.g., What was it called?)",
+              value: form.drinkName,
+              onChange: updateField,
+              required: true,
+            }),
+            React.createElement(
+              "div",
+              { className: "rating-block" },
+              React.createElement("span", null, "Overall rating"),
+              React.createElement(StarDisplay, {
+                rating: form.rating,
+                interactive: true,
+                onChange: (value) => setForm((current) => ({ ...current, rating: value })),
+              })
+            ),
+            React.createElement("textarea", {
+              name: "thoughts",
+              rows: 5,
+              placeholder: "Thoughts",
+              value: form.thoughts,
+              onChange: updateField,
+              required: true,
+            }),
+            React.createElement(
+              "button",
+              { className: "submit-button", type: "submit", disabled: !validateDraft(form) },
+              "Log My Sip"
+            )
           )
         )
-      ),
-      stickers.map((item) =>
-        React.createElement("img", {
-          key: item.className,
-          className: item.className,
-          src: item.src,
-          alt: item.alt,
-        })
       )
     ),
     React.createElement(
