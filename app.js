@@ -37,16 +37,56 @@ const starterEntries = [
 ];
 
 const flavorThemes = {
-  peach: { accent: "peach", note: "Juicy orchard energy" },
-  passionfruit: { accent: "passionfruit", note: "Tangy tropical glow" },
-  lemon: { accent: "lemon", note: "Zesty citrus sparkle" },
-  strawberry: { accent: "berry", note: "Candy-bright berry pop" },
-  raspberry: { accent: "berry", note: "Berry jam brightness" },
-  berry: { accent: "berry", note: "Mixed berry sweetness" },
-  mint: { accent: "mint", note: "Cool garden freshness" },
-  mango: { accent: "mango", note: "Golden fruit rush" },
-  lychee: { accent: "lychee", note: "Soft floral sweetness" },
+  peach: {
+    accent: "peach",
+    fruit: "🍑",
+    pattern: "peach-pattern",
+  },
+  passionfruit: {
+    accent: "passionfruit",
+    fruit: "🥭",
+    pattern: "passionfruit-pattern",
+  },
+  lemon: {
+    accent: "lemon",
+    fruit: "🍋",
+    pattern: "lemon-pattern",
+  },
+  strawberry: {
+    accent: "berry",
+    fruit: "🍓",
+    pattern: "berry-pattern",
+  },
+  raspberry: {
+    accent: "berry",
+    fruit: "🫐",
+    pattern: "berry-pattern",
+  },
+  berry: {
+    accent: "berry",
+    fruit: "🫐",
+    pattern: "berry-pattern",
+  },
+  mint: {
+    accent: "mint",
+    fruit: "🌿",
+    pattern: "mint-pattern",
+  },
+  mango: {
+    accent: "mango",
+    fruit: "🥭",
+    pattern: "mango-pattern",
+  },
 };
+
+const stickers = [
+  { src: "./assets/reference/sticker-berry-left.png", alt: "Berry sticker", className: "sticker sticker-berry-left" },
+  { src: "./assets/reference/sticker-strawberry-left.png", alt: "Strawberry sticker", className: "sticker sticker-strawberry-left" },
+  { src: "./assets/reference/sticker-peach-left.png", alt: "Peach sticker", className: "sticker sticker-peach-left" },
+  { src: "./assets/reference/sticker-blueberry-right.png", alt: "Blueberry sticker", className: "sticker sticker-blueberry-right" },
+  { src: "./assets/reference/sticker-raspberry-right.png", alt: "Raspberry sticker", className: "sticker sticker-raspberry-right" },
+  { src: "./assets/reference/sticker-lemon-right.png", alt: "Lemon sticker", className: "sticker sticker-lemon-right" },
+];
 
 function normalizeFlavor(flavor) {
   return flavor.trim().replace(/\s+/g, " ");
@@ -93,7 +133,6 @@ function groupEntries(entries) {
     if (!groups[flavorName]) {
       groups[flavorName] = [];
     }
-
     groups[flavorName].push(entry);
     return groups;
   }, {});
@@ -104,7 +143,7 @@ function sortFlavorNames(names) {
 }
 
 function resolveTheme(flavor) {
-  return flavorThemes[formatFlavorKey(flavor)] || { accent: "signature", note: "House special pour" };
+  return flavorThemes[formatFlavorKey(flavor)] || { accent: "signature", fruit: "🧋", pattern: "signature-pattern" };
 }
 
 function StarDisplay({ rating, interactive = false, onChange }) {
@@ -112,8 +151,8 @@ function StarDisplay({ rating, interactive = false, onChange }) {
     "div",
     {
       className: interactive ? "star-row star-row-interactive" : "star-row",
-      "aria-label": `${rating} out of 5 stars`,
       role: interactive ? "radiogroup" : undefined,
+      "aria-label": `${rating} out of 5 stars`,
     },
     Array.from({ length: 5 }, (_, index) => {
       const value = index + 1;
@@ -127,7 +166,7 @@ function StarDisplay({ rating, interactive = false, onChange }) {
             className: active ? "star active" : "star",
             "aria-hidden": true,
           },
-          "\u2605"
+          "★"
         );
       }
 
@@ -142,7 +181,7 @@ function StarDisplay({ rating, interactive = false, onChange }) {
           "aria-checked": rating === value,
           "aria-label": `${value} star${value > 1 ? "s" : ""}`,
         },
-        "\u2605"
+        "★"
       );
     })
   );
@@ -168,102 +207,93 @@ function Loader() {
         React.createElement("div", { className: "ice-cube cube-three" }),
         React.createElement("div", { className: "ice-cube cube-four" })
       )
-    ),
-    React.createElement("p", { className: "loader-copy" }, "Steeping your latest sips...")
+    )
   );
 }
 
 function ReviewBubble({ entry, isEditing, editForm, onStartEdit, onCancelEdit, onSaveEdit, onEditChange }) {
-  const activeFlavor = isEditing ? editForm.flavor : entry.flavor;
-  const theme = resolveTheme(activeFlavor);
+  const liveEntry = isEditing ? { ...entry, ...editForm } : entry;
+  const theme = resolveTheme(liveEntry.flavor);
 
   if (isEditing) {
     return React.createElement(
       "article",
-      {
-        className: "tea-bubble tea-bubble-editing",
-        "data-accent": theme.accent,
-      },
+      { className: "review-card review-card-editing", "data-accent": theme.accent },
+      React.createElement("div", { className: `card-pattern ${theme.pattern}` }),
       React.createElement(
         "div",
-        { className: "bubble-theme-note" },
-        React.createElement("span", { className: "bubble-theme-chip" }, normalizeFlavor(activeFlavor) || "Editing"),
-        React.createElement("p", null, theme.note)
-      ),
-      React.createElement(
-        "div",
-        { className: "edit-grid" },
+        { className: "card-body" },
         React.createElement(
-          "label",
-          null,
-          React.createElement("span", null, "Flavor"),
-          React.createElement("input", {
-            type: "text",
-            name: "flavor",
-            value: editForm.flavor,
-            onChange: onEditChange,
-            required: true,
-          })
-        ),
-        React.createElement(
-          "label",
-          null,
-          React.createElement("span", null, "Location"),
-          React.createElement("input", {
-            type: "text",
-            name: "location",
-            value: editForm.location,
-            onChange: onEditChange,
-            required: true,
-          })
-        ),
-        React.createElement(
-          "label",
-          { className: "edit-wide" },
-          React.createElement("span", null, "Drink name"),
-          React.createElement("input", {
-            type: "text",
-            name: "drinkName",
-            value: editForm.drinkName,
-            onChange: onEditChange,
-            required: true,
-          })
+          "div",
+          { className: "edit-grid" },
+          React.createElement(
+            "label",
+            { className: "edit-wide" },
+            React.createElement("span", null, "Flavor"),
+            React.createElement("input", {
+              type: "text",
+              name: "flavor",
+              value: editForm.flavor,
+              onChange: onEditChange,
+            })
+          ),
+          React.createElement(
+            "label",
+            { className: "edit-wide" },
+            React.createElement("span", null, "Location"),
+            React.createElement("input", {
+              type: "text",
+              name: "location",
+              value: editForm.location,
+              onChange: onEditChange,
+            })
+          ),
+          React.createElement(
+            "label",
+            { className: "edit-wide" },
+            React.createElement("span", null, "Drink name"),
+            React.createElement("input", {
+              type: "text",
+              name: "drinkName",
+              value: editForm.drinkName,
+              onChange: onEditChange,
+            })
+          ),
+          React.createElement(
+            "div",
+            { className: "bubble-rating-box edit-wide" },
+            React.createElement("span", null, "Overall rating"),
+            React.createElement(StarDisplay, {
+              rating: editForm.rating,
+              interactive: true,
+              onChange: (value) => onEditChange({ target: { name: "rating", value } }),
+            })
+          ),
+          React.createElement(
+            "label",
+            { className: "edit-wide" },
+            React.createElement("span", null, "Thoughts"),
+            React.createElement("textarea", {
+              name: "thoughts",
+              rows: 4,
+              value: editForm.thoughts,
+              onChange: onEditChange,
+            })
+          )
         ),
         React.createElement(
           "div",
-          { className: "bubble-rating-box edit-wide" },
-          React.createElement("span", null, "Overall rating"),
-          React.createElement(StarDisplay, {
-            rating: editForm.rating,
-            interactive: true,
-            onChange: (value) => onEditChange({ target: { name: "rating", value } }),
-          })
-        ),
-        React.createElement(
-          "label",
-          { className: "edit-wide" },
-          React.createElement("span", null, "Thoughts"),
-          React.createElement("textarea", {
-            name: "thoughts",
-            rows: 4,
-            value: editForm.thoughts,
-            onChange: onEditChange,
-            required: true,
-          })
-        )
-      ),
-      React.createElement(
-        "div",
-        { className: "bubble-actions" },
-        React.createElement(
-          "button",
-          { className: "bubble-button bubble-button-ghost", type: "button", onClick: onCancelEdit },
-          "Cancel"
-        ),
-        React.createElement(
-          "button",
-          { className: "bubble-button", type: "button", onClick: onSaveEdit, disabled: !validateDraft(editForm) },
-          "Save changes"
+          { className: "bubble-actions" },
+          React.createElement(
+            "button",
+            { className: "bubble-button bubble-button-ghost", type: "button", onClick: onCancelEdit },
+            "Cancel"
+          ),
+          React.createElement(
+            "button",
+            { className: "bubble-button", type: "button", onClick: onSaveEdit, disabled: !validateDraft(editForm) },
+            "Save"
+          )
         )
       )
     );
@@ -271,79 +301,19 @@ function ReviewBubble({ entry, isEditing, editForm, onStartEdit, onCancelEdit, o
 
   return React.createElement(
     "article",
-    {
-      className: "tea-bubble",
-      "data-accent": theme.accent,
-    },
+    { className: "review-card", "data-accent": theme.accent },
+    React.createElement("div", { className: `card-pattern ${theme.pattern}` }),
     React.createElement(
       "div",
-      { className: "bubble-theme-note" },
-      React.createElement("span", { className: "bubble-theme-chip" }, entry.flavor),
-      React.createElement("p", null, theme.note)
-    ),
-    React.createElement(
-      "div",
-      { className: "bubble-topline" },
-      React.createElement("span", { className: "bubble-location" }, entry.location),
-      React.createElement(StarDisplay, { rating: entry.rating })
-    ),
-    React.createElement("h3", null, entry.drinkName),
-    React.createElement("p", { className: "bubble-thoughts" }, entry.thoughts),
-    React.createElement(
-      "div",
-      { className: "bubble-actions" },
+      { className: "card-body" },
+      React.createElement("h3", { className: "card-title" }, entry.drinkName),
+      React.createElement("p", { className: "card-location" }, entry.location.toUpperCase()),
+      React.createElement(StarDisplay, { rating: entry.rating }),
+      React.createElement("p", { className: "card-thoughts" }, entry.thoughts),
       React.createElement(
         "button",
-        { className: "bubble-button bubble-button-ghost", type: "button", onClick: onStartEdit },
+        { className: "edit-pill", type: "button", onClick: onStartEdit },
         "Edit"
-      )
-    )
-  );
-}
-
-function FlavorSection({
-  flavor,
-  entries,
-  editingId,
-  editForm,
-  onStartEdit,
-  onCancelEdit,
-  onSaveEdit,
-  onEditChange,
-}) {
-  const theme = resolveTheme(flavor);
-
-  return React.createElement(
-    "section",
-    {
-      className: "flavor-section",
-      "data-accent": theme.accent,
-    },
-    React.createElement(
-      "div",
-      { className: "flavor-section-header" },
-      React.createElement("p", { className: "flavor-tag" }, `${entries.length} tea${entries.length === 1 ? "" : "s"}`),
-      React.createElement(
-        "div",
-        { className: "section-heading-copy" },
-        React.createElement("h2", null, flavor),
-        React.createElement("p", null, theme.note)
-      )
-    ),
-    React.createElement(
-      "div",
-      { className: "bubble-grid" },
-      entries.map((entry) =>
-        React.createElement(ReviewBubble, {
-          key: entry.id,
-          entry,
-          isEditing: editingId === entry.id,
-          editForm,
-          onStartEdit: () => onStartEdit(entry),
-          onCancelEdit,
-          onSaveEdit: () => onSaveEdit(entry.id),
-          onEditChange,
-        })
       )
     )
   );
@@ -359,20 +329,18 @@ function App() {
   useEffect(() => {
     const timeoutId = window.setTimeout(() => {
       const stored = window.localStorage.getItem(STORAGE_KEY);
-
       if (stored) {
         try {
           const parsedEntries = JSON.parse(stored);
-          setEntries(Array.isArray(parsedEntries) ? parsedEntries : starterEntries);
+          setEntries(Array.isArray(parsedEntries) && parsedEntries.length > 0 ? parsedEntries : starterEntries);
         } catch {
           setEntries(starterEntries);
         }
       } else {
         setEntries(starterEntries);
       }
-
       setIsLoading(false);
-    }, 1450);
+    }, 900);
 
     return () => window.clearTimeout(timeoutId);
   }, []);
@@ -385,6 +353,15 @@ function App() {
 
   const grouped = useMemo(() => groupEntries(entries), [entries]);
   const flavorNames = useMemo(() => sortFlavorNames(Object.keys(grouped)), [grouped]);
+  const orderedEntries = useMemo(
+    () =>
+      flavorNames.flatMap((flavor) =>
+        grouped[flavor]
+          .slice()
+          .sort((left, right) => new Date(right.createdAt).getTime() - new Date(left.createdAt).getTime())
+      ),
+    [flavorNames, grouped]
+  );
 
   function updateField(event) {
     const { name, value } = event.target;
@@ -393,7 +370,6 @@ function App() {
 
   function submitEntry(event) {
     event.preventDefault();
-
     if (!validateDraft(form)) {
       return;
     }
@@ -455,171 +431,139 @@ function App() {
   }
 
   return React.createElement(
-    React.Fragment,
-    null,
+    "main",
+    { className: "design-shell" },
     React.createElement(
-      "div",
-      { className: "floating-bubbles", "aria-hidden": true },
-      React.createElement("span", { className: "ambient-bubble bubble-a" }),
-      React.createElement("span", { className: "ambient-bubble bubble-b" }),
-      React.createElement("span", { className: "ambient-bubble bubble-c" }),
-      React.createElement("span", { className: "ambient-bubble bubble-d" }),
-      React.createElement("span", { className: "ambient-bubble bubble-e" }),
-      React.createElement("span", { className: "ambient-bubble bubble-f" })
-    ),
-    React.createElement(
-      "main",
-      { className: "page-shell" },
+      "section",
+      { className: "hero-section" },
       React.createElement(
-        "section",
-        { className: "hero-card" },
+        "div",
+        { className: "hero-copy" },
+        React.createElement("h1", null, "To Tea or", React.createElement("br"), "Not to Tea"),
         React.createElement(
-          "div",
-          { className: "hero-copy-wrap" },
-          React.createElement("p", { className: "eyebrow" }, "Peachy review journal"),
-          React.createElement("h1", null, "to tea or not to tea"),
-          React.createElement(
-            "p",
-            { className: "hero-copy" },
-            "A bright little home for every iced tea crush, surprise favorite, and politely disappointing sip."
-          )
-        ),
-        React.createElement(
-          "div",
-          { className: "hero-media" },
-          React.createElement("img", {
-            className: "hero-image hero-image-main",
-            src: "./assets/peach-hero.jpg",
-            alt: "Close-up of ripe peaches",
-          }),
-          React.createElement("img", {
-            className: "hero-image hero-image-secondary",
-            src: "./assets/peach-orchard.jpg",
-            alt: "Crates of peaches in an orchard",
-          })
+          "p",
+          null,
+          "A bright little home for every iced tea crush,",
+          React.createElement("br"),
+          "surprise favorite, and politely disappointing sip."
         )
       ),
       React.createElement(
-        "section",
+        "div",
+        { className: "top-illustration" },
+        React.createElement("img", {
+          className: "desk-illustration",
+          src: "./assets/reference/desk.png",
+          alt: "Desk illustration with plant, tea cup, and radio",
+        })
+      )
+    ),
+    React.createElement(
+      "div",
+      { className: "fruit-splash-band", "aria-hidden": true },
+      React.createElement("img", {
+        className: "fruit-band-piece fruit-band-left",
+        src: "./assets/reference/fruit-band-left.png",
+        alt: "",
+      }),
+      React.createElement("img", {
+        className: "fruit-band-piece fruit-band-right",
+        src: "./assets/reference/fruit-band-right.png",
+        alt: "",
+      }),
+      React.createElement("img", {
+        className: "fruit-band-center-sticker",
+        src: "./assets/reference/sticker-strawberry-left.png",
+        alt: "",
+      })
+    ),
+    React.createElement(
+      "section",
+      { className: "composer-wrap" },
+      React.createElement(
+        "div",
         { className: "composer-card" },
-        React.createElement(
-          "div",
-          { className: "composer-heading" },
-          React.createElement("h2", null, "Add a fresh tea bubble"),
-          React.createElement(
-            "p",
-            null,
-            "Log the flavor, where you found it, the name, your star rating, and your thoughts."
-          )
-        ),
+        React.createElement("h2", null, "Add a fresh tea bubble"),
         React.createElement(
           "form",
           { className: "tea-form", onSubmit: submitEntry },
-          React.createElement(
-            "label",
-            null,
-            React.createElement("span", null, "Flavor"),
-            React.createElement("input", {
-              type: "text",
-              name: "flavor",
-              placeholder: "Peach, passionfruit, lemon...",
-              value: form.flavor,
-              onChange: updateField,
-              required: true,
-            })
-          ),
-          React.createElement(
-            "label",
-            null,
-            React.createElement("span", null, "Location"),
-            React.createElement("input", {
-              type: "text",
-              name: "location",
-              placeholder: "Where did you get it?",
-              value: form.location,
-              onChange: updateField,
-              required: true,
-            })
-          ),
-          React.createElement(
-            "label",
-            null,
-            React.createElement("span", null, "Drink name"),
-            React.createElement("input", {
-              type: "text",
-              name: "drinkName",
-              placeholder: "What was it called?",
-              value: form.drinkName,
-              onChange: updateField,
-              required: true,
-            })
-          ),
+          React.createElement("input", {
+            type: "text",
+            name: "flavor",
+            placeholder: "Flavor (e.g., Peach, passionfruit)",
+            value: form.flavor,
+            onChange: updateField,
+            required: true,
+          }),
+          React.createElement("input", {
+            type: "text",
+            name: "location",
+            placeholder: "Location (e.g., Where did you get it?)",
+            value: form.location,
+            onChange: updateField,
+            required: true,
+          }),
+          React.createElement("input", {
+            type: "text",
+            name: "drinkName",
+            placeholder: "Drink name (e.g., What was it called?)",
+            value: form.drinkName,
+            onChange: updateField,
+            required: true,
+          }),
           React.createElement(
             "div",
-            { className: "rating-picker" },
-            React.createElement("span", { className: "rating-label" }, "Overall rating"),
+            { className: "rating-block" },
+            React.createElement("span", null, "Overall rating"),
             React.createElement(StarDisplay, {
               rating: form.rating,
               interactive: true,
               onChange: (value) => setForm((current) => ({ ...current, rating: value })),
-            }),
-            React.createElement("small", null, `${form.rating} out of 5 stars`)
-          ),
-          React.createElement(
-            "label",
-            { className: "thoughts-field" },
-            React.createElement("span", null, "Thoughts"),
-            React.createElement("textarea", {
-              name: "thoughts",
-              rows: 5,
-              placeholder: "How did it taste? Would you order it again?",
-              value: form.thoughts,
-              onChange: updateField,
-              required: true,
             })
           ),
+          React.createElement("textarea", {
+            name: "thoughts",
+            rows: 5,
+            placeholder: "Thoughts",
+            value: form.thoughts,
+            onChange: updateField,
+            required: true,
+          }),
           React.createElement(
             "button",
             { className: "submit-button", type: "submit", disabled: !validateDraft(form) },
-            "Add tea to the board"
+            "Log My Sip"
           )
         )
       ),
+      stickers.map((item) =>
+        React.createElement("img", {
+          key: item.className,
+          className: item.className,
+          src: item.src,
+          alt: item.alt,
+        })
+      )
+    ),
+    React.createElement(
+      "section",
+      { className: "flavor-board-section" },
+      React.createElement("h2", { className: "board-title" }, "The Flavor Board"),
       React.createElement(
-        "section",
-        { className: "board" },
-        React.createElement(
-          "div",
-          { className: "board-header" },
-          React.createElement("h2", null, "Flavor bubbles"),
-          React.createElement(
-            "p",
-            null,
-            "Each review bubble now carries its own fruit mood, and every entry can be edited right where it lives."
-          )
-        ),
-        flavorNames.length > 0
-          ? flavorNames.map((flavor) =>
-              React.createElement(FlavorSection, {
-                key: flavor,
-                flavor,
-                entries: grouped[flavor].sort(
-                  (left, right) => new Date(right.createdAt).getTime() - new Date(left.createdAt).getTime()
-                ),
-                editingId,
-                editForm,
-                onStartEdit: startEdit,
-                onCancelEdit: cancelEdit,
-                onSaveEdit: saveEdit,
-                onEditChange: updateEditField,
-              })
-            )
-          : React.createElement(
-              "div",
-              { className: "empty-state" },
-              React.createElement("h3", null, "No teas yet"),
-              React.createElement("p", null, "Your first sip review will bloom here.")
-            )
+        "div",
+        { className: "review-grid" },
+        orderedEntries.map((entry) =>
+          React.createElement(ReviewBubble, {
+            key: entry.id,
+            entry,
+            isEditing: editingId === entry.id,
+            editForm,
+            onStartEdit: () => startEdit(entry),
+            onCancelEdit: cancelEdit,
+            onSaveEdit: () => saveEdit(entry.id),
+            onEditChange: updateEditField,
+          })
+        )
       )
     )
   );
