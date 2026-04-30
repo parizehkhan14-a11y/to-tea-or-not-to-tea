@@ -37,42 +37,10 @@ const starterEntries = [
 ];
 
 const flavorThemes = {
-  peach: {
-    accent: "peach",
-    pattern: "peach-pattern",
-  },
-  passionfruit: {
-    accent: "passionfruit",
-    pattern: "passionfruit-pattern",
-  },
-  lemon: {
-    accent: "lemon",
-    pattern: "lemon-pattern",
-  },
-  strawberry: {
-    accent: "berry",
-    pattern: "berry-pattern",
-  },
-  raspberry: {
-    accent: "berry",
-    pattern: "berry-pattern",
-  },
-  berry: {
-    accent: "berry",
-    pattern: "berry-pattern",
-  },
-  mint: {
-    accent: "mint",
-    pattern: "mint-pattern",
-  },
-  mango: {
-    accent: "mango",
-    pattern: "mango-pattern",
-  },
-  lychee: {
-    accent: "lychee",
-    pattern: "lychee-pattern",
-  },
+  peach: { accent: "peach", pattern: "peach-pattern" },
+  passionfruit: { accent: "passionfruit", pattern: "passionfruit-pattern" },
+  lemon: { accent: "lemon", pattern: "lemon-pattern" },
+  lychee: { accent: "lychee", pattern: "lychee-pattern" },
 };
 
 function normalizeFlavor(flavor) {
@@ -114,23 +82,55 @@ function validateDraft(draft) {
   );
 }
 
-function groupEntries(entries) {
-  return entries.reduce((groups, entry) => {
-    const flavorName = normalizeFlavor(entry.flavor);
-    if (!groups[flavorName]) {
-      groups[flavorName] = [];
-    }
-    groups[flavorName].push(entry);
-    return groups;
-  }, {});
-}
-
-function sortFlavorNames(names) {
-  return [...names].sort((left, right) => left.localeCompare(right));
-}
-
 function resolveTheme(flavor) {
-  return flavorThemes[formatFlavorKey(flavor)] || { accent: "signature", pattern: "lychee-pattern" };
+  return flavorThemes[formatFlavorKey(flavor)] || { accent: "peach", pattern: "peach-pattern" };
+}
+
+function byNewest(a, b) {
+  return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+}
+
+function sortEntries(entries, filter) {
+  const copy = [...entries];
+
+  if (filter === "highest") {
+    return copy.sort((a, b) => b.rating - a.rating || byNewest(a, b));
+  }
+
+  if (filter === "lowest") {
+    return copy.sort((a, b) => a.rating - b.rating || byNewest(a, b));
+  }
+
+  if (filter === "flavor") {
+    return copy.sort((a, b) => normalizeFlavor(a.flavor).localeCompare(normalizeFlavor(b.flavor)) || byNewest(a, b));
+  }
+
+  if (filter === "location") {
+    return copy.sort((a, b) => a.location.localeCompare(b.location) || byNewest(a, b));
+  }
+
+  return copy.sort(byNewest);
+}
+
+function usePageState() {
+  const initial = window.location.hash === "#reviews" ? "reviews" : "home";
+  const [page, setPage] = useState(initial);
+
+  useEffect(() => {
+    function syncFromHash() {
+      setPage(window.location.hash === "#reviews" ? "reviews" : "home");
+    }
+
+    window.addEventListener("hashchange", syncFromHash);
+    return () => window.removeEventListener("hashchange", syncFromHash);
+  }, []);
+
+  function changePage(next) {
+    window.location.hash = next === "reviews" ? "reviews" : "";
+    setPage(next);
+  }
+
+  return [page, changePage];
 }
 
 function StarDisplay({ rating, interactive = false, onChange }) {
@@ -153,7 +153,7 @@ function StarDisplay({ rating, interactive = false, onChange }) {
             className: active ? "star active" : "star",
             "aria-hidden": true,
           },
-          "★"
+          "\u2605"
         );
       }
 
@@ -168,7 +168,7 @@ function StarDisplay({ rating, interactive = false, onChange }) {
           "aria-checked": rating === value,
           "aria-label": `${value} star${value > 1 ? "s" : ""}`,
         },
-        "★"
+        "\u2605"
       );
     })
   );
@@ -194,6 +194,31 @@ function Loader() {
         React.createElement("div", { className: "ice-cube cube-three" }),
         React.createElement("div", { className: "ice-cube cube-four" })
       )
+    )
+  );
+}
+
+function PageNav({ page, onChangePage }) {
+  return React.createElement(
+    "div",
+    { className: "page-nav" },
+    React.createElement(
+      "button",
+      {
+        type: "button",
+        className: page === "home" ? "page-chip active" : "page-chip",
+        onClick: () => onChangePage("home"),
+      },
+      "Front Page"
+    ),
+    React.createElement(
+      "button",
+      {
+        type: "button",
+        className: page === "reviews" ? "page-chip active" : "page-chip",
+        onClick: () => onChangePage("reviews"),
+      },
+      "All Reviews"
     )
   );
 }
@@ -306,9 +331,30 @@ function ReviewBubble({ entry, isEditing, editForm, onStartEdit, onCancelEdit, o
   );
 }
 
+function ReviewsGrid({ entries, editingId, editForm, onStartEdit, onCancelEdit, onSaveEdit, onEditChange }) {
+  return React.createElement(
+    "div",
+    { className: "review-grid" },
+    entries.map((entry) =>
+      React.createElement(ReviewBubble, {
+        key: entry.id,
+        entry,
+        isEditing: editingId === entry.id,
+        editForm,
+        onStartEdit: () => onStartEdit(entry),
+        onCancelEdit,
+        onSaveEdit: () => onSaveEdit(entry.id),
+        onEditChange,
+      })
+    )
+  );
+}
+
 function App() {
   const [entries, setEntries] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [page, setPage] = usePageState();
+  const [sortMode, setSortMode] = useState("latest");
   const [form, setForm] = useState(emptyForm());
   const [editingId, setEditingId] = useState(null);
   const [editForm, setEditForm] = useState(emptyForm());
@@ -338,17 +384,8 @@ function App() {
     }
   }, [entries, isLoading]);
 
-  const grouped = useMemo(() => groupEntries(entries), [entries]);
-  const flavorNames = useMemo(() => sortFlavorNames(Object.keys(grouped)), [grouped]);
-  const orderedEntries = useMemo(
-    () =>
-      flavorNames.flatMap((flavor) =>
-        grouped[flavor]
-          .slice()
-          .sort((left, right) => new Date(right.createdAt).getTime() - new Date(left.createdAt).getTime())
-      ),
-    [flavorNames, grouped]
-  );
+  const featuredEntries = useMemo(() => [...entries].sort(byNewest).slice(0, 3), [entries]);
+  const allSortedEntries = useMemo(() => sortEntries(entries, sortMode), [entries, sortMode]);
 
   function updateField(event) {
     const { name, value } = event.target;
@@ -373,6 +410,7 @@ function App() {
 
     setEntries((current) => [nextEntry, ...current]);
     setForm(emptyForm());
+    setPage("reviews");
   }
 
   function startEdit(entry) {
@@ -420,9 +458,10 @@ function App() {
   return React.createElement(
     "main",
     { className: "design-shell" },
+    React.createElement(PageNav, { page, onChangePage: setPage }),
     React.createElement(
       "section",
-      { className: "hero-stage" },
+      { className: page === "home" ? "hero-stage" : "hero-stage hero-stage-reviews" },
       React.createElement("img", {
         className: "hero-backdrop",
         src: "./assets/backdrop.png",
@@ -502,27 +541,97 @@ function App() {
         )
       )
     ),
-    React.createElement(
-      "section",
-      { className: "flavor-board-section" },
-      React.createElement("h2", { className: "board-title" }, "The Flavor Board"),
-      React.createElement(
-        "div",
-        { className: "review-grid" },
-        orderedEntries.map((entry) =>
-          React.createElement(ReviewBubble, {
-            key: entry.id,
-            entry,
-            isEditing: editingId === entry.id,
+    page === "home"
+      ? React.createElement(
+          "section",
+          { className: "flavor-board-section" },
+          React.createElement("h2", { className: "board-title" }, "The Flavor Board"),
+          React.createElement(ReviewsGrid, {
+            entries: featuredEntries,
+            editingId,
             editForm,
-            onStartEdit: () => startEdit(entry),
+            onStartEdit: startEdit,
             onCancelEdit: cancelEdit,
-            onSaveEdit: () => saveEdit(entry.id),
+            onSaveEdit: saveEdit,
+            onEditChange: updateEditField,
+          }),
+          React.createElement(
+            "div",
+            { className: "board-footer" },
+            React.createElement(
+              "button",
+              { type: "button", className: "page-chip active", onClick: () => setPage("reviews") },
+              "See All Reviews"
+            )
+          )
+        )
+      : React.createElement(
+          "section",
+          { className: "all-reviews-section" },
+          React.createElement(
+            "div",
+            { className: "reviews-header" },
+            React.createElement("h2", { className: "board-title" }, "All Reviews"),
+            React.createElement(
+              "div",
+              { className: "sort-toolbar" },
+              React.createElement(
+                "button",
+                {
+                  type: "button",
+                  className: sortMode === "latest" ? "sort-chip active" : "sort-chip",
+                  onClick: () => setSortMode("latest"),
+                },
+                "Latest"
+              ),
+              React.createElement(
+                "button",
+                {
+                  type: "button",
+                  className: sortMode === "highest" ? "sort-chip active" : "sort-chip",
+                  onClick: () => setSortMode("highest"),
+                },
+                "Highest Rated"
+              ),
+              React.createElement(
+                "button",
+                {
+                  type: "button",
+                  className: sortMode === "lowest" ? "sort-chip active" : "sort-chip",
+                  onClick: () => setSortMode("lowest"),
+                },
+                "Lowest Rated"
+              ),
+              React.createElement(
+                "button",
+                {
+                  type: "button",
+                  className: sortMode === "flavor" ? "sort-chip active" : "sort-chip",
+                  onClick: () => setSortMode("flavor"),
+                },
+                "Flavor"
+              ),
+              React.createElement(
+                "button",
+                {
+                  type: "button",
+                  className: sortMode === "location" ? "sort-chip active" : "sort-chip",
+                  onClick: () => setSortMode("location"),
+                },
+                "Location"
+              )
+            )
+          ),
+          React.createElement(ReviewsGrid, {
+            entries: allSortedEntries,
+            editingId,
+            editForm,
+            onStartEdit: startEdit,
+            onCancelEdit: cancelEdit,
+            onSaveEdit: saveEdit,
             onEditChange: updateEditField,
           })
         )
-      )
-    )
   );
 }
 
