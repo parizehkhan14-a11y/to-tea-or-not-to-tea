@@ -25,7 +25,7 @@ body {
   min-height: 100vh;
   color: var(--ink);
   font-family: "Nunito", sans-serif;
-  background: linear-gradient(180deg, #fbf5e8 0%, #fff4e4 42%, #f9eddc 100%);
+  background: #FAAFCB;
   overflow-x: hidden;
 }
 
