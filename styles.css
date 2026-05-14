@@ -70,25 +70,84 @@ textarea {
 
 .page-chip,
 .sort-chip {
+  position: relative;
   border: 1px solid var(--chip-border);
-  background: var(--chip);
+  background:
+    radial-gradient(circle at 28% 28%, rgba(255, 255, 255, 0.68), transparent 18%),
+    linear-gradient(145deg, #ffe78c, #f7c947 58%, #efad31);
   color: var(--ink);
-  border-radius: 999px;
-  padding: 0.72rem 1.1rem;
+  border-radius: 58% 42% 50% 50% / 48% 55% 45% 52%;
+  min-width: 5.8rem;
+  padding: 0.78rem 1.15rem 0.82rem;
   font-weight: 800;
   cursor: pointer;
-  box-shadow: 0 8px 16px rgba(112, 84, 58, 0.08);
+  box-shadow:
+    inset -7px -8px 0 rgba(171, 115, 30, 0.08),
+    0 8px 16px rgba(112, 84, 58, 0.12);
+  isolation: isolate;
+  transform: rotate(-1.5deg);
+}
+
+.page-chip::before,
+.sort-chip::before,
+.submit-button::before,
+.bubble-button::before,
+.edit-pill::before {
+  content: "";
+  position: absolute;
+  top: -0.46rem;
+  right: 1.05rem;
+  width: 1rem;
+  height: 0.58rem;
+  border-radius: 100% 0 100% 0;
+  background: linear-gradient(135deg, #6fa35a, #3f7439);
+  box-shadow: 0 1px 0 rgba(34, 23, 15, 0.16);
+  transform: rotate(-22deg);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.page-chip:nth-child(2),
+.sort-chip:nth-child(2) {
+  background:
+    radial-gradient(circle at 31% 30%, rgba(255, 255, 255, 0.62), transparent 17%),
+    linear-gradient(145deg, #ffd9a8, #f69b65 56%, #dd6f53);
+  border-radius: 54% 46% 58% 42% / 54% 50% 50% 46%;
+}
+
+.page-chip:nth-child(2)::before,
+.sort-chip:nth-child(2)::before {
+  background: linear-gradient(135deg, #7daf66, #456f39);
 }
 
 .page-chip.active,
 .sort-chip.active {
-  background: linear-gradient(180deg, #dfa394, #d98979);
-  color: #fff5ef;
+  background:
+    radial-gradient(circle at 28% 28%, rgba(255, 255, 255, 0.66), transparent 18%),
+    linear-gradient(145deg, #ffa67e, #f0745f 56%, #cf4c43);
+  color: #fffdf2;
   border-color: transparent;
+  text-shadow: 0 1px 0 rgba(82, 42, 28, 0.22);
 }
 
 .admin-chip {
   margin-left: auto;
+  background:
+    radial-gradient(circle at 30% 28%, rgba(255, 255, 255, 0.62), transparent 18%),
+    linear-gradient(145deg, #ffc0a3, #f58a68 58%, #d76452);
+  border-radius: 52% 48% 46% 54% / 48% 52% 48% 52%;
+}
+
+.admin-chip::after,
+.submit-button::after,
+.edit-pill::after {
+  content: "";
+  position: absolute;
+  inset: 0.24rem 0.58rem 0.24rem auto;
+  width: 36%;
+  border-radius: 50%;
+  border-right: 2px solid rgba(129, 71, 45, 0.15);
+  pointer-events: none;
 }
 
 .hero-stage {
@@ -289,14 +348,20 @@ textarea {
 }
 
 .submit-button {
+  position: relative;
   margin-top: 0.35rem;
-  border-radius: 999px;
+  border-radius: 52% 48% 47% 53% / 48% 55% 45% 52%;
   padding: 0.95rem 1.2rem;
-  background: linear-gradient(180deg, #dfa394, #d98979);
+  background:
+    radial-gradient(circle at 30% 26%, rgba(255, 255, 255, 0.5), transparent 18%),
+    linear-gradient(145deg, #ffc6a8, #ef8d70 58%, #d76657);
   color: #fff2ea;
   font-weight: 900;
   font-size: 1.35rem;
-  box-shadow: 0 12px 18px rgba(177, 121, 101, 0.2);
+  text-shadow: 0 1px 0 rgba(81, 42, 28, 0.2);
+  box-shadow:
+    inset -10px -10px 0 rgba(111, 50, 32, 0.08),
+    0 12px 18px rgba(177, 121, 101, 0.2);
 }
 
 .submit-button:disabled {
@@ -432,13 +497,35 @@ textarea {
 }
 
 .edit-pill {
+  position: relative;
   margin-top: 0.95rem;
-  padding: 0.42rem 1.1rem;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.95);
-  color: var(--ink);
-  font-weight: 800;
-  box-shadow: 0 5px 10px rgba(112, 84, 58, 0.1);
+  min-width: 4.35rem;
+  padding: 0.55rem 1.1rem 0.6rem;
+  border-radius: 51% 49% 48% 52% / 48% 54% 46% 52%;
+  background:
+    radial-gradient(circle at 30% 28%, rgba(255, 255, 255, 0.58), transparent 18%),
+    linear-gradient(145deg, #ffc2a0, #f48a68 58%, #d76655);
+  color: #fffdf2;
+  font-weight: 900;
+  text-shadow: 0 1px 0 rgba(86, 45, 30, 0.18);
+  box-shadow:
+    inset -6px -6px 0 rgba(111, 50, 32, 0.08),
+    0 7px 12px rgba(112, 84, 58, 0.16);
+}
+
+.review-card[data-accent="lemon"] .edit-pill {
+  background:
+    radial-gradient(circle at 30% 28%, rgba(255, 255, 255, 0.65), transparent 18%),
+    linear-gradient(145deg, #fff08f, #f5ca41 58%, #e5a929);
+  color: #3f2a16;
+  text-shadow: none;
+}
+
+.review-card[data-accent="passionfruit"] .edit-pill,
+.review-card[data-accent="lychee"] .edit-pill {
+  background:
+    radial-gradient(circle at 32% 28%, rgba(255, 255, 255, 0.62), transparent 17%),
+    linear-gradient(145deg, #b780b7, #824179 56%, #5f2859);
 }
 
 .review-card-editing {
@@ -472,21 +559,38 @@ textarea {
 }
 
 .bubble-button {
+  position: relative;
   padding: 0.68rem 1rem;
-  border-radius: 999px;
-  background: linear-gradient(180deg, #de9b8c, #d88f80);
+  border-radius: 53% 47% 49% 51% / 47% 54% 46% 53%;
+  background:
+    radial-gradient(circle at 30% 27%, rgba(255, 255, 255, 0.52), transparent 18%),
+    linear-gradient(145deg, #ffc2a0, #ef8a68 58%, #d76252);
   color: white;
   font-weight: 900;
+  text-shadow: 0 1px 0 rgba(86, 45, 30, 0.2);
+  box-shadow:
+    inset -6px -7px 0 rgba(111, 50, 32, 0.08),
+    0 7px 12px rgba(112, 84, 58, 0.14);
 }
 
 .bubble-button-ghost {
-  background: white;
+  background:
+    radial-gradient(circle at 30% 28%, rgba(255, 255, 255, 0.7), transparent 18%),
+    linear-gradient(145deg, #fff6b8, #f6d55a 58%, #e3ae35);
   color: var(--ink);
+  text-shadow: none;
 }
 
 .bubble-button-danger {
   margin-right: auto;
-  background: linear-gradient(180deg, #c95f52, #a94239);
+  border-radius: 50%;
+  min-width: 4.4rem;
+  background:
+    radial-gradient(circle at 34% 27%, rgba(255, 255, 255, 0.5), transparent 16%),
+    radial-gradient(circle at 33% 33%, #e78aaa 0 5%, transparent 6%),
+    radial-gradient(circle at 58% 38%, #e78aaa 0 5%, transparent 6%),
+    radial-gradient(circle at 45% 60%, #e78aaa 0 5%, transparent 6%),
+    linear-gradient(145deg, #8e467a, #663061 58%, #4d244b);
 }
 
 .admin-modal-backdrop {
