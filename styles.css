@@ -87,10 +87,18 @@ textarea {
   border-color: transparent;
 }
 
+.admin-chip {
+  margin-left: auto;
+}
+
 .hero-stage {
   position: relative;
   margin-bottom: 0.25rem;
   padding-bottom: clamp(11rem, 15vw, 14rem);
+}
+
+.hero-stage-compact {
+  padding-bottom: 0;
 }
 
 .hero-backdrop {
@@ -196,8 +204,10 @@ textarea {
 
 .tea-form input,
 .tea-form textarea,
+.tea-form select,
 .edit-grid input,
-.edit-grid textarea {
+.edit-grid textarea,
+.edit-grid select {
   width: 100%;
   border: 1.5px solid #d7d3c9;
   border-radius: 16px;
@@ -209,8 +219,10 @@ textarea {
 
 .tea-form input:focus,
 .tea-form textarea:focus,
+.tea-form select:focus,
 .edit-grid input:focus,
-.edit-grid textarea:focus {
+.edit-grid textarea:focus,
+.edit-grid select:focus {
   border-color: #d89b84;
   box-shadow: 0 0 0 4px rgba(221, 152, 136, 0.13);
 }
@@ -346,6 +358,22 @@ textarea {
   border-radius: 110px 110px 52px 52px;
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.88), rgba(251, 248, 241, 0.95));
   box-shadow: 0 18px 34px rgba(112, 84, 58, 0.18);
+}
+
+.rank-badge {
+  position: absolute;
+  top: 0.95rem;
+  left: 50%;
+  z-index: 2;
+  min-width: 3.2rem;
+  padding: 0.45rem 0.72rem;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #fff3b3, #f4c94d);
+  color: #5b341d;
+  font-weight: 900;
+  text-align: center;
+  box-shadow: 0 8px 16px rgba(112, 84, 58, 0.16);
+  transform: translateX(-50%);
 }
 
 .card-pattern {
@@ -713,6 +741,10 @@ textarea {
 
   .page-nav {
     justify-content: center;
+  }
+
+  .admin-chip {
+    margin-left: 0;
   }
 
   .hero-stage {

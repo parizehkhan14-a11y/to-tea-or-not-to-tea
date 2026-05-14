@@ -15,6 +15,7 @@ const starterEntries = [
     location: "The Corner Cafe",
     drinkName: "Sunset Peach Iced Tea",
     rating: 5,
+    rankPosition: 1,
     thoughts:
       "Super juicy and bright with a mellow black tea base. Tasted like peach rings in the best way.",
     createdAt: "2026-04-28T16:00:00.000Z",
@@ -25,6 +26,7 @@ const starterEntries = [
     location: "Bubble Stop",
     drinkName: "Passionfruit Green Tea",
     rating: 4,
+    rankPosition: 2,
     thoughts:
       "Tangy, tropical, and really refreshing. A little sweet, but the citrus edge balanced it out.",
     createdAt: "2026-04-27T12:30:00.000Z",
@@ -35,6 +37,7 @@ const starterEntries = [
     location: "Picnic Market",
     drinkName: "Sparkling Lemon Iced Tea",
     rating: 3,
+    rankPosition: 3,
     thoughts:
       "Crisp and fizzy with a strong lemon finish. Good for hot days, but I wanted a little more tea flavor.",
     createdAt: "2026-04-25T10:15:00.000Z",
@@ -62,6 +65,7 @@ function emptyForm() {
     location: "",
     drinkName: "",
     rating: 5,
+    rankPosition: "",
     thoughts: "",
   };
 }
@@ -72,6 +76,7 @@ function toEntryDraft(entry) {
     location: entry.location,
     drinkName: entry.drinkName,
     rating: entry.rating,
+    rankPosition: entry.rankPosition || "",
     thoughts: entry.thoughts,
   };
 }
@@ -83,6 +88,7 @@ function rowToEntry(row) {
     location: row.location,
     drinkName: row.drink_name,
     rating: row.rating,
+    rankPosition: row.rank_position || "",
     thoughts: row.thoughts,
     createdAt: row.created_at,
   };
@@ -95,6 +101,7 @@ function entryToRow(entry) {
     location: entry.location,
     drink_name: entry.drinkName,
     rating: entry.rating,
+    rank_position: entry.rankPosition || null,
     thoughts: entry.thoughts,
     created_at: entry.createdAt,
   };
@@ -121,7 +128,8 @@ function validateDraft(draft) {
     draft.drinkName.trim() &&
     draft.thoughts.trim() &&
     draft.rating >= 1 &&
-    draft.rating <= 5
+    draft.rating <= 5 &&
+    (draft.rankPosition === "" || (Number(draft.rankPosition) >= 1 && Number(draft.rankPosition) <= 3))
   );
 }
 
@@ -153,6 +161,40 @@ function sortEntries(entries, filter) {
   }
 
   return copy.sort(byNewest);
+}
+
+function rankedEntries(entries) {
+  const ranked = entries
+    .filter((entry) => entry.rankPosition)
+    .sort((a, b) => Number(a.rankPosition) - Number(b.rankPosition))
+    .slice(0, 3);
+
+  if (ranked.length === 3) {
+    return ranked;
+  }
+
+  const rankedIds = new Set(ranked.map((entry) => entry.id));
+  const fallbackEntries = [...entries]
+    .filter((entry) => !rankedIds.has(entry.id))
+    .sort((a, b) => b.rating - a.rating || byNewest(a, b));
+
+  return [...ranked, ...fallbackEntries].slice(0, 3);
+}
+
+function formatRank(rankPosition) {
+  if (Number(rankPosition) === 1) {
+    return "1st";
+  }
+
+  if (Number(rankPosition) === 2) {
+    return "2nd";
+  }
+
+  if (Number(rankPosition) === 3) {
+    return "3rd";
+  }
+
+  return "";
 }
 
 function usePageState() {
@@ -241,7 +283,7 @@ function Loader() {
   );
 }
 
-function PageNav({ page, onChangePage }) {
+function PageNav({ page, onChangePage, isAdminUnlocked, onAdminLogin, onAdminLogout }) {
   return React.createElement(
     "div",
     { className: "page-nav" },
@@ -262,7 +304,27 @@ function PageNav({ page, onChangePage }) {
         onClick: () => onChangePage("reviews"),
       },
       "All Reviews"
+    ),
+    React.createElement(
+      "button",
+      {
+        type: "button",
+        className: isAdminUnlocked ? "page-chip admin-chip active" : "page-chip admin-chip",
+        onClick: isAdminUnlocked ? onAdminLogout : onAdminLogin,
+      },
+      isAdminUnlocked ? "Admin: Log Out" : "Admin Login"
     )
+  );
+}
+
+function RankSelect({ value, onChange, name = "rankPosition" }) {
+  return React.createElement(
+    "select",
+    { name, value, onChange },
+    React.createElement("option", { value: "" }, "No top rank"),
+    React.createElement("option", { value: "1" }, "1st place"),
+    React.createElement("option", { value: "2" }, "2nd place"),
+    React.createElement("option", { value: "3" }, "3rd place")
   );
 }
 
@@ -327,6 +389,15 @@ function ReviewBubble({ entry, isEditing, editForm, onStartEdit, onCancelEdit, o
           React.createElement(
             "label",
             { className: "edit-wide" },
+            React.createElement("span", null, "Top 3 rank"),
+            React.createElement(RankSelect, {
+              value: editForm.rankPosition,
+              onChange: onEditChange,
+            })
+          ),
+          React.createElement(
+            "label",
+            { className: "edit-wide" },
             React.createElement("span", null, "Thoughts"),
             React.createElement("textarea", {
               name: "thoughts",
@@ -363,6 +434,8 @@ function ReviewBubble({ entry, isEditing, editForm, onStartEdit, onCancelEdit, o
     "article",
     { className: "review-card", "data-accent": theme.accent },
     React.createElement("div", { className: `card-pattern ${theme.pattern}` }),
+    entry.rankPosition &&
+      React.createElement("div", { className: "rank-badge" }, formatRank(entry.rankPosition)),
     React.createElement(
       "div",
       { className: "card-body" },
@@ -438,6 +511,7 @@ function App() {
   const [editForm, setEditForm] = useState(emptyForm());
   const [isAdminUnlocked, setIsAdminUnlocked] = useState(() => window.sessionStorage.getItem(ADMIN_SESSION_KEY) === "true");
   const [pendingEditEntry, setPendingEditEntry] = useState(null);
+  const [adminLoginOpen, setAdminLoginOpen] = useState(false);
   const [adminPassword, setAdminPassword] = useState("");
   const [adminError, setAdminError] = useState("");
 
@@ -517,7 +591,7 @@ function App() {
     }
   }, [entries, isLoading]);
 
-  const featuredEntries = useMemo(() => [...entries].sort(byNewest).slice(0, 3), [entries]);
+  const featuredEntries = useMemo(() => rankedEntries(entries), [entries]);
   const availableFlavors = useMemo(
     () => [...new Set(entries.map((entry) => normalizeFlavor(entry.flavor)))].sort((a, b) => a.localeCompare(b)),
     [entries]
@@ -545,21 +619,53 @@ function App() {
       location: form.location.trim(),
       drinkName: form.drinkName.trim(),
       rating: Number(form.rating),
+      rankPosition: form.rankPosition ? Number(form.rankPosition) : "",
       thoughts: form.thoughts.trim(),
       createdAt: new Date().toISOString(),
     };
 
-    setEntries((current) => [nextEntry, ...current].sort(byNewest));
+    setEntries((current) =>
+      [nextEntry, ...current]
+        .map((entry) =>
+          nextEntry.rankPosition && entry.id !== nextEntry.id && Number(entry.rankPosition) === Number(nextEntry.rankPosition)
+            ? { ...entry, rankPosition: "" }
+            : entry
+        )
+        .sort(byNewest)
+    );
     setForm(emptyForm());
     setFlavorMenuOpen(false);
     setPage("reviews");
 
     try {
-      const { error } = await teaStore.from("tea_reviews").insert(entryToRow(nextEntry));
+      const { error } = await teaStore.rpc("insert_tea_review_admin", {
+        review_id: nextEntry.id,
+        admin_password: "Princesspeach",
+        next_flavor: nextEntry.flavor,
+        next_location: nextEntry.location,
+        next_drink_name: nextEntry.drinkName,
+        next_rating: nextEntry.rating,
+        next_rank_position: nextEntry.rankPosition || null,
+        next_thoughts: nextEntry.thoughts,
+        next_created_at: nextEntry.createdAt,
+      });
       if (error) {
         throw error;
       }
     } catch {
+      try {
+        await teaStore.from("tea_reviews").insert({
+          id: nextEntry.id,
+          flavor: nextEntry.flavor,
+          location: nextEntry.location,
+          drink_name: nextEntry.drinkName,
+          rating: nextEntry.rating,
+          thoughts: nextEntry.thoughts,
+          created_at: nextEntry.createdAt,
+        });
+      } catch {
+        // Keep a local copy if Supabase is temporarily unavailable.
+      }
       window.localStorage.setItem(STORAGE_KEY, JSON.stringify([nextEntry, ...entries].sort(byNewest)));
     }
   }
@@ -576,12 +682,27 @@ function App() {
     }
 
     setPendingEditEntry(entry);
+    setAdminLoginOpen(true);
     setAdminPassword("");
     setAdminError("");
   }
 
+  function startAdminLogin() {
+    setPendingEditEntry(null);
+    setAdminLoginOpen(true);
+    setAdminPassword("");
+    setAdminError("");
+  }
+
+  function logoutAdmin() {
+    setIsAdminUnlocked(false);
+    window.sessionStorage.removeItem(ADMIN_SESSION_KEY);
+    cancelEdit();
+  }
+
   function cancelAdminLogin() {
     setPendingEditEntry(null);
+    setAdminLoginOpen(false);
     setAdminPassword("");
     setAdminError("");
   }
@@ -622,20 +743,28 @@ function App() {
     setEntries((current) =>
       current
         .map((entry) => {
-          if (entry.id !== entryId) {
-            return entry;
-          }
-
-          updatedEntry = {
+          if (entry.id === entryId) {
+            updatedEntry = {
               ...entry,
               flavor: normalizeFlavor(editForm.flavor),
               location: editForm.location.trim(),
               drinkName: editForm.drinkName.trim(),
               rating: Number(editForm.rating),
+              rankPosition: editForm.rankPosition ? Number(editForm.rankPosition) : "",
               thoughts: editForm.thoughts.trim(),
             };
 
-          return updatedEntry;
+            return updatedEntry;
+          }
+
+          if (
+            editForm.rankPosition &&
+            Number(entry.rankPosition) === Number(editForm.rankPosition)
+          ) {
+            return { ...entry, rankPosition: "" };
+          }
+
+          return entry;
         })
         .sort(byNewest)
     );
@@ -654,6 +783,7 @@ function App() {
         next_location: updatedEntry.location,
         next_drink_name: updatedEntry.drinkName,
         next_rating: updatedEntry.rating,
+        next_rank_position: updatedEntry.rankPosition || null,
         next_thoughts: updatedEntry.thoughts,
       });
 
@@ -661,6 +791,19 @@ function App() {
         throw error;
       }
     } catch {
+      try {
+        await teaStore.rpc("update_tea_review_admin", {
+          review_id: entryId,
+          admin_password: "Princesspeach",
+          next_flavor: updatedEntry.flavor,
+          next_location: updatedEntry.location,
+          next_drink_name: updatedEntry.drinkName,
+          next_rating: updatedEntry.rating,
+          next_thoughts: updatedEntry.thoughts,
+        });
+      } catch {
+        // Keep a local copy if the older database function is unavailable.
+      }
       window.localStorage.setItem(STORAGE_KEY, JSON.stringify(entries.map((entry) => (entry.id === entryId ? updatedEntry : entry))));
     }
   }
@@ -698,12 +841,15 @@ function App() {
     { className: "design-shell" },
     React.createElement(PageNav, {
       page,
+      isAdminUnlocked,
+      onAdminLogin: startAdminLogin,
+      onAdminLogout: logoutAdmin,
       onChangePage: (nextPage) => {
         setFlavorMenuOpen(false);
         setPage(nextPage);
       },
     }),
-    pendingEditEntry &&
+    adminLoginOpen &&
       React.createElement(AdminLoginModal, {
         password: adminPassword,
         error: adminError,
@@ -717,7 +863,7 @@ function App() {
           null,
           React.createElement(
             "section",
-            { className: "hero-stage" },
+            { className: isAdminUnlocked ? "hero-stage" : "hero-stage hero-stage-compact" },
             React.createElement("img", {
               className: "hero-backdrop",
               src: "./assets/backdrop.png",
@@ -729,75 +875,85 @@ function App() {
               { className: "hero-copy" },
               React.createElement("h1", null, "To Tea or", React.createElement("br"), "Not to Tea")
             ),
-            React.createElement(
-              "section",
-              { className: "composer-section" },
+            isAdminUnlocked &&
               React.createElement(
-                "div",
-                { className: "composer-wrap" },
+                "section",
+                { className: "composer-section" },
                 React.createElement(
                   "div",
-                  { className: "composer-card" },
-                  React.createElement("h2", null, "Add a fresh tea bubble"),
+                  { className: "composer-wrap" },
                   React.createElement(
-                    "form",
-                    { className: "tea-form", onSubmit: submitEntry },
-                    React.createElement("input", {
-                      type: "text",
-                      name: "flavor",
-                      placeholder: "Flavor (e.g., Peach, passionfruit)",
-                      value: form.flavor,
-                      onChange: updateField,
-                      required: true,
-                    }),
-                    React.createElement("input", {
-                      type: "text",
-                      name: "location",
-                      placeholder: "Location (e.g., Where did you get it?)",
-                      value: form.location,
-                      onChange: updateField,
-                      required: true,
-                    }),
-                    React.createElement("input", {
-                      type: "text",
-                      name: "drinkName",
-                      placeholder: "Drink name (e.g., What was it called?)",
-                      value: form.drinkName,
-                      onChange: updateField,
-                      required: true,
-                    }),
+                    "div",
+                    { className: "composer-card" },
+                    React.createElement("h2", null, "Add a fresh tea bubble"),
                     React.createElement(
-                      "div",
-                      { className: "rating-block" },
-                      React.createElement("span", null, "Overall rating"),
-                      React.createElement(StarDisplay, {
-                        rating: form.rating,
-                        interactive: true,
-                        onChange: (value) => setForm((current) => ({ ...current, rating: value })),
-                      })
-                    ),
-                    React.createElement("textarea", {
-                      name: "thoughts",
-                      rows: 4,
-                      placeholder: "Thoughts",
-                      value: form.thoughts,
-                      onChange: updateField,
-                      required: true,
-                    }),
-                    React.createElement(
-                      "button",
-                      { className: "submit-button", type: "submit", disabled: !validateDraft(form) },
-                      "Log My Sip"
+                      "form",
+                      { className: "tea-form", onSubmit: submitEntry },
+                      React.createElement("input", {
+                        type: "text",
+                        name: "flavor",
+                        placeholder: "Flavor (e.g., Peach, passionfruit)",
+                        value: form.flavor,
+                        onChange: updateField,
+                        required: true,
+                      }),
+                      React.createElement("input", {
+                        type: "text",
+                        name: "location",
+                        placeholder: "Location (e.g., Where did you get it?)",
+                        value: form.location,
+                        onChange: updateField,
+                        required: true,
+                      }),
+                      React.createElement("input", {
+                        type: "text",
+                        name: "drinkName",
+                        placeholder: "Drink name (e.g., What was it called?)",
+                        value: form.drinkName,
+                        onChange: updateField,
+                        required: true,
+                      }),
+                      React.createElement(
+                        "div",
+                        { className: "rating-block" },
+                        React.createElement("span", null, "Overall rating"),
+                        React.createElement(StarDisplay, {
+                          rating: form.rating,
+                          interactive: true,
+                          onChange: (value) => setForm((current) => ({ ...current, rating: value })),
+                        })
+                      ),
+                      React.createElement(
+                        "label",
+                        { className: "rating-block" },
+                        React.createElement("span", null, "Top 3 rank"),
+                        React.createElement(RankSelect, {
+                          value: form.rankPosition,
+                          onChange: updateField,
+                        })
+                      ),
+                      React.createElement("textarea", {
+                        name: "thoughts",
+                        rows: 4,
+                        placeholder: "Thoughts",
+                        value: form.thoughts,
+                        onChange: updateField,
+                        required: true,
+                      }),
+                      React.createElement(
+                        "button",
+                        { className: "submit-button", type: "submit", disabled: !validateDraft(form) },
+                        "Log My Sip"
+                      )
                     )
                   )
                 )
               )
-            )
           ),
           React.createElement(
             "section",
             { className: "flavor-board-section" },
-            React.createElement("h2", { className: "board-title" }, "The Flavor Board"),
+            React.createElement("h2", { className: "board-title" }, "Top 3 Iced Teas"),
             React.createElement(ReviewsGrid, {
               entries: featuredEntries,
               editingId,
