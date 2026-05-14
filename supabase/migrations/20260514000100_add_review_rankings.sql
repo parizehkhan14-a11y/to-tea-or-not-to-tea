@@ -31,7 +31,7 @@ as $$
 declare
   inserted_review public.tea_reviews;
 begin
-  if admin_password <> 'Princesspeach' then
+  if admin_password <> 'princesspeach' then
     raise exception 'Invalid admin password' using errcode = '28000';
   end if;
 
@@ -85,7 +85,7 @@ as $$
 declare
   updated_review public.tea_reviews;
 begin
-  if admin_password <> 'Princesspeach' then
+  if admin_password <> 'princesspeach' then
     raise exception 'Invalid admin password' using errcode = '28000';
   end if;
 

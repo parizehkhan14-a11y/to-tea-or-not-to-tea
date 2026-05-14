@@ -8,7 +8,7 @@ security definer
 set search_path = public
 as $$
 begin
-  if admin_password <> 'Princesspeach' then
+  if admin_password <> 'princesspeach' then
     raise exception 'Invalid admin password' using errcode = '28000';
   end if;
 

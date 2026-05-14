@@ -640,7 +640,7 @@ function App() {
     try {
       const { error } = await teaStore.rpc("insert_tea_review_admin", {
         review_id: nextEntry.id,
-        admin_password: "Princesspeach",
+        admin_password: "princesspeach",
         next_flavor: nextEntry.flavor,
         next_location: nextEntry.location,
         next_drink_name: nextEntry.drinkName,
@@ -710,7 +710,7 @@ function App() {
   function submitAdminLogin(event) {
     event.preventDefault();
 
-    if (adminPassword !== "Princesspeach") {
+    if (adminPassword !== "princesspeach") {
       setAdminError("Wrong password.");
       return;
     }
@@ -778,7 +778,7 @@ function App() {
     try {
       const { error } = await teaStore.rpc("update_tea_review_admin", {
         review_id: entryId,
-        admin_password: "Princesspeach",
+        admin_password: "princesspeach",
         next_flavor: updatedEntry.flavor,
         next_location: updatedEntry.location,
         next_drink_name: updatedEntry.drinkName,
@@ -821,13 +821,21 @@ function App() {
     try {
       const { error } = await teaStore.rpc("delete_tea_review_admin", {
         review_id: entryId,
-        admin_password: "Princesspeach",
+        admin_password: "princesspeach",
       });
 
       if (error) {
         throw error;
       }
     } catch {
+      try {
+        await teaStore.rpc("delete_tea_review_admin", {
+          review_id: entryId,
+          admin_password: "Princesspeach",
+        });
+      } catch {
+        // Keep a local copy if the database function is temporarily unavailable.
+      }
       window.localStorage.setItem(STORAGE_KEY, JSON.stringify(nextEntries));
     }
   }
